@@ -1,5 +1,3 @@
-PLEASE
-
 #' Extract Ontology ID from GRDI term
 #'
 #' @param x Vector of GRDI terms in the format "Term name \[ONTOLOGY:0000000\]"
