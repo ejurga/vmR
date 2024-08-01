@@ -1,3 +1,35 @@
+#' Get id for contact information, inserting into the DB if necessary
+#'
+#' @param db [DBI] connection
+#' @param lab Laboratory name, passed onto collection_information.laboratory_name
+#' @param name Contact name, passed onto collection_information.contact_name
+#' @param email Contact email, passed onto collection_information.contact_email
+return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:0001668]",
+                                                     name="Not Provided [GENEPIO:0001668]",
+                                                     email="Not Provided [GENEPIO:0001668]"){
+
+  id <- dbGetQuery(db,
+                   "SELECT id from contact_information WHERE
+                   laboratory_name = $1 AND
+                   contact_name = $2 AND
+                   contact_email = $3",
+                   list(lab, name, email)) %>% as_tibble()
+
+  if (nrow(id)==0){
+    message("Contact info not found, adding")
+    id <- dbGetQuery(db,
+               "INSERT INTO contact_information (laboratory_name, contact_name, contact_email)
+               VALUES ($1, $2, $3) RETURNING id",
+               list(lab, name, email)) %>% as_tibble()
+    return_id <- id$id
+  } else {
+    return_id <- id$id
+  }
+}
+
+
+
+
 #' Insert data into collection_information and associated tables
 #'
 #' Inserts data into the table "collection_information", and the
@@ -169,6 +201,6 @@ insert_alternative_isolate_ids <- function(db, sample_ids, iso_ids, alt_ids, not
     ) VALUES (
       (SELECT id FROM isolates WHERE isolate_id = $1),
       $2, $3)
-    ON CONFLICT ON CONSTRAINT alt_iso_ids_keep_unique DO NOTHING",
+    ON CONFLICT ON CONSTRAINT alternative_isolate_ids_alternative_isolate_id_key DO NOTHING",
     list(iso_ids, alt_ids, notes))
 }
