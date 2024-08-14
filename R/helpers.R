@@ -219,10 +219,11 @@ lookup_table_terms <- function(db, lookup_table){
 
 #' Match lookup terms
 #'
-amatch_term <- function(db, x, lookup_table, maxDist=30){
+amatch_term <- function(db, x, lookup_table){
   df <- lookup_table_terms(vmr, lookup_table)
-  res <- stringdist::amatch(x=x, table=df$en_term, maxDist = maxDist)
-  res_df <- df[res,]
+  res <- stringdist::afind(pattern=x, x=df$en_term)
+  res_df <- df[max.col(t(-res$distance)),]
   for (i in seq(length(x))) message(x[i], " --> ", res_df$en_term[i])
   return(res_df)
 }
+
