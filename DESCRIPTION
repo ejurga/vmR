@@ -2,7 +2,7 @@ Package: vmR
 Title: A suite of R tools to interact with the VMR
 Version: 0.1
 Authors@R: 
-    person("Emil", "Jurga", ,"emil.jurga@phac-aspc.gc.ca", role = c("aut", "cre")
+    person("Emil", "Jurga", ,"emil.jurga@phac-aspc.gc.ca", role = c("aut", "cre"))
 Description: R tools to interface with the VMR
 License: 
 Encoding: UTF-8
