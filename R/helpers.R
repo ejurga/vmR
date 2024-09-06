@@ -48,6 +48,7 @@ get_template_map <- function(db){
 
 #' Get the vmr's mapping row for the GRDI column
 #'
+#' @export
 get_mapping_for_one_col <- function(db, grdi_col){
   map <-
     get_template_map(db) %>%
@@ -58,6 +59,7 @@ get_mapping_for_one_col <- function(db, grdi_col){
 
 #' Separate a GRDI multi choice column into a long-form dataframe
 #'
+#' @export
 seperate_column_into_longform <- function(df, col){
   df.long <-
     df %>%
@@ -68,6 +70,7 @@ seperate_column_into_longform <- function(df, col){
 
 #' Insert df into one of the multi choice tables
 #'
+#' @export
 insert_into_multi_choice_table <- function(db, df, table){
     df <- df %>% select(id, everything())
     if (length(colnames(df))!=2) stop("df not 2 columns")
@@ -137,6 +140,7 @@ rename_grdi_cols_to_vmr <- function(db, df, table){
 
 #' Select fields related to VMR table
 #'
+#' @export
 select_vmr_fields <- function(db, df, table){
 
   tab_fields <- dbListFields(db, table)
@@ -153,6 +157,7 @@ select_vmr_fields <- function(db, df, table){
 
 #' Get a list of multi choice tables associated with the VMR table
 #'
+#' @export
 multi_choice_tables <- function(db, table){
 
   fk <- dbReadTable(vmr, "foreign_keys") %>% as_tibble()
@@ -183,6 +188,7 @@ multi_choice_tables <- function(db, table){
 #' @param df A dataframe formatted to match VMR column names
 #' @param vmr_table The target VMR table.
 #'
+#' @export
 all_table_ontology_columns_to_vmr_ids <- function(db, df, vmr_table){
 
   # Get columns that are ontology fields
@@ -219,6 +225,7 @@ lookup_table_terms <- function(db, lookup_table){
 
 #' Match lookup terms
 #'
+#' @export
 amatch_term <- function(db, x, lookup_table){
   df <- lookup_table_terms(vmr, lookup_table)
   res <- stringdist::afind(pattern=x, x=df$en_term)
