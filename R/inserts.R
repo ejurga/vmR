@@ -4,6 +4,8 @@
 #' @param lab Laboratory name, passed onto collection_information.laboratory_name
 #' @param name Contact name, passed onto collection_information.contact_name
 #' @param email Contact email, passed onto collection_information.contact_email
+#' 
+#' @export
 return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:0001668]",
                                                      name="Not Provided [GENEPIO:0001668]",
                                                      email="Not Provided [GENEPIO:0001668]"){
@@ -158,6 +160,8 @@ insert_geo_loc <- function(db, df){
 #'
 #' @param db connection to VRM
 #' @param x Vector of GRDI column geo_loc_name (site)
+#'
+#' @export
 check_for_existing_geo_loc_site <- function(db, x){
 
   fac <- factor(x)
@@ -192,7 +196,7 @@ check_for_existing_geo_loc_site <- function(db, x){
 
 #' Convenience function to update alternative isolate IDS with notes
 #'
-#'
+#' @export
 insert_alternative_isolate_ids <- function(db, sample_ids, iso_ids, alt_ids, notes){
   dbExecute(
     db,

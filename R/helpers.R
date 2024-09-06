@@ -97,7 +97,7 @@ insert_into_multi_choice_table <- function(db, df, table){
 #'  @export
 transform_and_insert_multi_choice_column <- function(db, df, column){
 
-  map <- get_mapping_for_one_col(vmr, column)
+  map <- get_mapping_for_one_col(db, column)
 
   if (map$is_multi_choice){
     df <- seperate_column_into_longform(df, column)
@@ -106,10 +106,10 @@ transform_and_insert_multi_choice_column <- function(db, df, column){
   }
 
   if (map$is_lookup==TRUE){
-    df[[column]] <- convert_GRDI_ont_to_vmr_ids(vmr, df[[column]])
+    df[[column]] <- convert_GRDI_ont_to_vmr_ids(db, df[[column]])
   }
   message("Inserting into ", map$vmr_table)
-  insert_into_multi_choice_table(vmr, df, table = map$vmr_table)
+  insert_into_multi_choice_table(db, df, table = map$vmr_table)
 }
 
 #' Renaming a GRDI formatted dataframe to a VMR table
