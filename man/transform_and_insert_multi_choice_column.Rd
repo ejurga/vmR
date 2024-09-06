@@ -13,9 +13,7 @@ transform_and_insert_multi_choice_column(db, df, column)
 well as the id field that the multi-choice table will use as a foreign key.}
 
 \item{column}{str, the name of the GRDI column that can take on multiple
-values
-
-@export}
+values}
 }
 \description{
 Currently, the GRDI schema allows some fields to be populated with multiple

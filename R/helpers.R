@@ -94,7 +94,7 @@ insert_into_multi_choice_table <- function(db, df, table){
 #' @param column str, the name of the GRDI column that can take on multiple
 #'  values
 #'
-#'  @export
+#' @export
 transform_and_insert_multi_choice_column <- function(db, df, column){
 
   map <- get_mapping_for_one_col(db, column)
