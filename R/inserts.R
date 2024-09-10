@@ -29,7 +29,22 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
   }
 }
 
-
+#' First, just set the respective isolate IDs to VMR isolate IDs
+#'
+#' Attempt to use the possible_isolate_names view to set the user 
+#' isolate IDs to VMR isolate_IDs
+#'
+#' @param db [DBI] connection
+#' @param x The vector to attempt to convert to VMR IDs
+#' @export
+#'
+set_vmr_isolate_id_from_alternates <- function(db, x){
+  vmrPos <- dbReadTable(db, "possible_isolate_names") %>% as_tibble()
+  m <- match(x, vmrPos$isolate_collector_id)
+  res <- vmrPos$isolate_id[m]
+  if (anyNA(res)) message("NAs detected, total: ", sum(is.na(res)))
+  return(res)  
+}
 
 
 #' Insert data into collection_information and associated tables
