@@ -29,7 +29,7 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
   }
 }
 
-#' First, just set the respective isolate IDs to VMR isolate IDs
+#' Set user isolate IDs to VMR ids from all possible alternative ids
 #'
 #' Attempt to use the possible_isolate_names view to set the user 
 #' isolate IDs to VMR isolate_IDs
