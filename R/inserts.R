@@ -1,3 +1,66 @@
+#' Insert new project into the VMR database
+#' 
+#' @export
+new_project <- function(db, sample_plan_id, sample_plan_name, project_name = NA, 
+                        description = NA){
+  
+  sql <- DBI::SQL(
+    "INSERT INTO projects 
+    (sample_plan_id, sample_plan_name, project_name, description)
+    VALUES 
+    ($1, $2, $3, $4)"
+  )
+  
+  x <- dbExecute(db, sql, list(sample_plan_id,  
+                               sample_plan_name, 
+                               project_name,  
+                               description))  
+  
+  return(paste("Inserted", x, "value into DB"))
+  
+}
+
+#' Insert new samples into the samples table
+#' 
+#' @param sample_names sample name to insert
+#' @param project_id VMR project ID associated with the sample 
+#' 
+#' @export
+new_samples <- function(db, sample_names, project_id){
+  
+  sql <- DBI::SQL(
+    "INSERT INTO samples 
+    (sample_collector_sample_id, project_id)
+    VALUES 
+    ($1, $2)"
+  )
+  
+  x <- dbExecute(db, sql, list(sample_names, project_id))
+  
+  return(paste("Inserted", x, "samples into DB")) 
+  
+}
+
+
+#' Insert alternative sample ids
+#' 
+#' @export
+insert_alternative_sample_ids <- function(db, vmr_sample_id, alt_id, note = NA){
+  
+  if (is.na(note)) note = rep(NA, length(vmr_sample_id))
+  
+  sql <- SQL(
+    "INSERT INTO alternative_sample_ids  
+    (sample_id, alternative_sample_id, note)
+    VALUES 
+    ($1, $2, $3)"
+  )
+  
+  x <- dbExecute(db, sql, list(vmr_sample_id, alt_id, note))
+  return(paste("Inserted", x, "alternative sample ids to DB")) 
+}
+
+
 #' Get id for contact information, inserting into the DB if necessary
 #'
 #' @param db [DBI] connection
@@ -8,21 +71,30 @@
 #' @export
 return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:0001668]",
                                                      name="Not Provided [GENEPIO:0001668]",
-                                                     email="Not Provided [GENEPIO:0001668]"){
+                                                     email="Not Provided [GENEPIO:0001668]", 
+                                                     note=NA){
 
   id <- dbGetQuery(db,
-                   "SELECT id from contact_information WHERE
-                   laboratory_name = $1 AND
-                   contact_name = $2 AND
-                   contact_email = $3",
-                   list(lab, name, email)) %>% as_tibble()
+                   "SELECT id 
+                    FROM contact_information 
+                    WHERE laboratory_name = $1 
+                          AND
+                          contact_name = $2 
+                          AND
+                          contact_email = $3
+                          AND 
+                          note = $4", 
+                   list(lab, name, email, note)) %>% as_tibble()
 
   if (nrow(id)==0){
     message("Contact info not found, adding")
     id <- dbGetQuery(db,
-               "INSERT INTO contact_information (laboratory_name, contact_name, contact_email)
-               VALUES ($1, $2, $3) RETURNING id",
-               list(lab, name, email)) %>% as_tibble()
+               "INSERT INTO contact_information 
+               (laboratory_name, contact_name, contact_email, note)
+               VALUES 
+               ($1, $2, $3, $4) 
+               RETURNING id",
+               list(lab, name, email, note)) %>% as_tibble()
     return_id <- id$id
   } else {
     return_id <- id$id
@@ -56,70 +128,38 @@ set_vmr_isolate_id_from_alternates <- function(db, x){
 #' @param df a dataframe of the relevant GRDI fields.
 #'
 #' @export
-insert_collection_information <- function(db, df){
-  message("Inserting into collection_information")
-  insert_sql <-
-    "INSERT INTO collection_information (
-      sample_id,
-      sample_collected_by,
-      contact_information,
-      sample_collection_project_name,
-      sample_collection_date,
-      sample_collection_date_precision,
-      presampling_activity_details,
-      sample_received_date,
-      original_sample_description,
-      specimen_processing,
-      sample_storage_method,
-      sample_storage_medium,
-      collection_device,
-      collection_method,
-      sample_plan
-      ) VALUES (
-      $1,
-      (select (id) from ontology_terms where ontology_id = $2),
-      $3,
-      $4,
-      $5,
-      (select (id) from ontology_terms where ontology_id = $6),
-      $7,
-      $8,
-      $9,
-      (select (id) from ontology_terms where ontology_id = $10),
-      $11,
-      $12,
-      (select (id) from ontology_terms where ontology_id = $13),
-      (select (id) from ontology_terms where ontology_id = $14),
-      $15) RETURNING id, sample_id"
-
-    params <- list()
-    params[[1]] <- df$sample_id
-    params[[2]] <- df$sample_collected_by |> extract_ont_id()
-    params[[3]] <- df$contact_information
-    params[[4]] <- df$sample_collection_project_name
-    params[[5]] <- df$sample_collection_date
-    params[[6]] <- df$sample_collection_date_precision |> extract_ont_id()
-    params[[7]] <- df$presampling_activity_details
-    params[[8]] <- df$sample_received_date
-    params[[9]] <- df$original_sample_description
-    params[[10]] <- df$specimen_processing |> extract_ont_id()
-    params[[11]] <- df$sample_storage_method
-    params[[12]] <- df$sample_storage_medium
-    params[[13]] <- df$collection_device |> extract_ont_id()
-    params[[14]] <- df$collection_method |> extract_ont_id()
-    params[[15]] <- df$sample_plan
-
-    params_no_null <- replace_null_params_with_na(params)
-
-    ids <- sendBindFetch(db, sql = insert_sql, params = params_no_null)
-
-    df <- left_join(ids, df, by = "sample_id")
-
+insert_collection_information <- 
+  function(db, 
+           sample_id, 
+           sample_collected_by = NA, 
+           contact_information = NA, 
+           sample_collection_date = NA,
+           sample_collection_date_precision = NA, 
+           presampling_activity_details = NA, 
+           sample_received_date = NA, 
+           original_sample_description = NA, 
+           specimen_processing = NA, 
+           sample_storage_method = NA, 
+           sample_storage_medium = NA, 
+           collection_device = NA, 
+           collection_method = NA){
+    
+    sql_args <- sql_args_to_uniform_list(environment())
+    insert_sql <- make_insert_sql(table_name = "collection_information", field_names = names(sql_arg))
+    params <- sql_args_to_ontology_ids(db = db,  
+                                       sql_arguments = sql_args, 
+                                       ontology_columns = c("sample_collected_by",  
+                                                            "sample_collection_date_precision",  
+                                                            "specimen_processing", 
+                                                            "collection_device", 
+                                                            "collection_method"))
+    res <- dbExecute(db, insert_sql, unname(params))
+    message("Inserted ", res, " records into collection_information")
+    # Now For the multi-choice tables
     populate_multi_choice_table(db = db, df = df,
                                 main_table = "collection_information",
                                 grdi_col = "purpose_of_sampling",
                                 col_table = "sample_purpose")
-
     populate_multi_choice_table(db = db, df = df,
                                 main_table = "collection_information",
                                 grdi_col = "presampling_activity",
@@ -127,7 +167,6 @@ insert_collection_information <- function(db, df){
 
     message("Done, call dbCommit or dbRollback")
 }
-
 
 #' Insert data into geo_loc and associated tables
 #'
@@ -212,7 +251,7 @@ check_for_existing_geo_loc_site <- function(db, x){
 #' Convenience function to update alternative isolate IDS with notes
 #'
 #' @export
-insert_alternative_isolate_ids <- function(db, sample_ids, iso_ids, alt_ids, notes){
+insert_alternative_isolate_ids <- function(db, iso_ids, alt_ids, notes){
   dbExecute(
     db,
     "INSERT INTO alternative_isolate_ids (
