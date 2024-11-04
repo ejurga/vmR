@@ -140,45 +140,35 @@ insert_collection_information <-
 
 #' Insert data into geo_loc and associated tables
 #'
-#' Inserts data into the table "geo_loc". Will check for existing entry
-#'
+#' Inserts data into the table "geo_loc". 
 #'
 #' @param db a [DBI] connection to the VMR
-#' @param df a dataframe of the relevant GRDI fields.
-#'
+#' @param country As ontology terms with IDS
+#' @param state_province_region As ontology terms with IDS
+#' @param site as VMR site ID from 
+#' @param latitude as point
+#' @param lontitude as point
+#' 
 #' @export
-insert_geo_loc <- function(db, df){
-
-  sql_str <-
-    glue::glue_sql(.con = db,
-      "INSERT INTO geo_loc (
-        sample_id,
-        geo_loc_name_country,
-        geo_loc_name_state_province_region,
-        geo_loc_name_site,
-        geo_loc_latitude,
-        geo_loc_longitude
-      ) VALUES (
-        $1,
-        (select (id) from ontology_terms where ontology_id = $2),
-        (select (id) from ontology_terms where ontology_id = $3),
-        (select (id) from ontology_terms where ontology_id = $4),
-        $5, $6)
-      RETURNING id, sample_id")
-
-  params <- list()
-  params[[1]] <- df$sample_id
-  params[[2]] <- df$`geo_loc_name (country)` |> extract_ont_id()
-  params[[3]] <- df$`geo_loc_name (state/province/region)` |> extract_ont_id()
-  params[[4]] <- check_for_existing_geo_loc_site(db, df$`geo_loc_name (site)`)
-  params[[5]] <- df$`geo_loc latitude`
-  params[[6]] <- df$`geo_loc longitude`
-
-  params_no_null <- replace_null_params_with_na(params)
-
-  ids <- sendBindFetch(db = db, sql = sql_str, params = params_no_null,
-                       verbose = T)
-}
+insert_geo_loc <- function(db, sample_id, 
+                           country = NA, 
+                           state_province_region = NA, 
+                           site = NA, 
+                           latitude = NA, 
+                           longitude = NA){
+  
+    sql_args <- sql_args_to_uniform_list(environment())
+    
+    insert_sql <- make_insert_sql(table_name = "geo_loc", field_names = names(sql_args))
+   
+    sql_args$country <- 
+      convert_GRDI_ont_to_vmr_ids(db, sql_args$country, ont_table = "countries")
+    sql_args$state_province_region <-
+      convert_GRDI_ont_to_vmr_ids(db, sql_args$state_province_region, ont_table = "state_province_region")
+    
+    res <- dbExecute(db, insert_sql, unname(sql_args))
+    message("Inserted ", res, " records into geo_loc table")
+} 
 
 #' Convenience function to update alternative isolate IDS with notes
 #'
