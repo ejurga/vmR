@@ -8,11 +8,12 @@ return_or_insert_contact_information(
   db,
   lab = "Not Provided [GENEPIO:0001668]",
   name = "Not Provided [GENEPIO:0001668]",
-  email = "Not Provided [GENEPIO:0001668]"
+  email = "Not Provided [GENEPIO:0001668]",
+  note = NA
 )
 }
 \arguments{
-\item{db}{\link{DBI} connection}
+\item{db}{\link{DBI} connection to VMR}
 
 \item{lab}{Laboratory name, passed onto collection_information.laboratory_name}
 

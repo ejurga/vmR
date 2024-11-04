@@ -4,7 +4,16 @@
 \alias{insert_alternative_isolate_ids}
 \title{Convenience function to update alternative isolate IDS with notes}
 \usage{
-insert_alternative_isolate_ids(db, sample_ids, iso_ids, alt_ids, notes)
+insert_alternative_isolate_ids(db, iso_ids, alt_ids, notes)
+}
+\arguments{
+\item{db}{\link{DBI} connection to VMR}
+
+\item{iso_ids}{user defined user ids}
+
+\item{alt_ids}{alternative isolate id to add}
+
+\item{notes}{notes for the alternative id}
 }
 \description{
 Convenience function to update alternative isolate IDS with notes

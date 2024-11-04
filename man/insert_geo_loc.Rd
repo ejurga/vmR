@@ -4,13 +4,29 @@
 \alias{insert_geo_loc}
 \title{Insert data into geo_loc and associated tables}
 \usage{
-insert_geo_loc(db, df)
+insert_geo_loc(
+  db,
+  sample_id,
+  country = NA,
+  state_province_region = NA,
+  site = NA,
+  latitude = NA,
+  longitude = NA
+)
 }
 \arguments{
-\item{db}{a \link{DBI} connection to the VMR}
+\item{db}{\link{DBI} connection to VMR}
 
-\item{df}{a dataframe of the relevant GRDI fields.}
+\item{country}{As ontology terms with IDS}
+
+\item{state_province_region}{As ontology terms with IDS}
+
+\item{site}{as VMR site ID from}
+
+\item{latitude}{as point}
+
+\item{lontitude}{as point}
 }
 \description{
-Inserts data into the table "geo_loc". Will check for existing entry
+Inserts data into the table "geo_loc".
 }

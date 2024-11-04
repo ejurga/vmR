@@ -1,10 +1,10 @@
 #' Insert new project into the VMR database
 #' 
 #' @inheritParams get_sample_ids
-#' @param sample_plant_id
-#' @param sample_plan_name
-#' @param project_name
-#' @param description
+#' @param sample_plan_id VMR sample plan id
+#' @param sample_plan_name The sample plan name
+#' @param project_name The project name
+#' @param description Description of the project
 #' 
 #' @export
 new_project <- function(db, sample_plan_id, sample_plan_name, project_name = NA, 
@@ -115,19 +115,6 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
 #' Inserts data into the table "collection_information", 
 #' 
 #' @inheritParams get_sample_ids
-#' @param sample_id 
-#' @param sample_collected_by 
-#' @param contact_information 
-#' @param sample_collection_date
-#' @param sample_collection_date_precision 
-#' @param presampling_activity_details 
-#' @param sample_received_date 
-#' @param original_sample_description 
-#' @param specimen_processing 
-#' @param sample_storage_method 
-#' @param sample_storage_medium 
-#' @param collection_device 
-#' @param collection_method
 #'
 #' @export
 insert_collection_information <- 

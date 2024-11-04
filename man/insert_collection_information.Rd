@@ -4,14 +4,26 @@
 \alias{insert_collection_information}
 \title{Insert data into collection_information and associated tables}
 \usage{
-insert_collection_information(db, df)
+insert_collection_information(
+  db,
+  sample_id,
+  sample_collected_by = NA,
+  contact_information = NA,
+  sample_collection_date = NA,
+  sample_collection_date_precision = NA,
+  presampling_activity_details = NA,
+  sample_received_date = NA,
+  original_sample_description = NA,
+  specimen_processing = NA,
+  sample_storage_method = NA,
+  sample_storage_medium = NA,
+  collection_device = NA,
+  collection_method = NA
+)
 }
 \arguments{
-\item{db}{a \link{DBI} connection to the VMR}
-
-\item{df}{a dataframe of the relevant GRDI fields.}
+\item{db}{\link{DBI} connection to VMR}
 }
 \description{
-Inserts data into the table "collection_information", and the
-associated multi-choice tables "sample_purpose" and "sample_activity".
+Inserts data into the table "collection_information",
 }
