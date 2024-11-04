@@ -1,6 +1,6 @@
 #' Get sample ids from the sample_collector_sample_ids
 #' 
-#' @param DBI connection to VMR
+#' @param db [DBI] connection to VMR
 #' @param sample_names values to query
 #' 
 #' @export
@@ -106,9 +106,6 @@ insert_into_multi_choice_table <- function(db, df, table){
     colnames(df) <- new_cols
     dbAppendTable(db, name = table, value = df)
 }
-
-#' Populate a "multi-choice" table in the VMR
-#'
 
 #' Renaming a GRDI formatted dataframe to a VMR table
 #'
