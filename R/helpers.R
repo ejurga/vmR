@@ -1,3 +1,20 @@
+#' Get sample ids from the sample_collector_sample_ids
+#' 
+#' @param DBI connection to VMR
+#' @param sample_names values to query
+#' 
+#' @export
+get_sample_ids <- function(db, sample_names){
+  
+  x <-
+    dbGetQuery(
+      db, 
+      "SELECT id FROM samples WHERE sample_collector_sample_id = $1", 
+      list(sample_names))
+  
+  return(x$id)
+}
+
 #' Extract Ontology ID from GRDI term
 #'
 #' @param x Vector of GRDI terms in the format "Term name \[ONTOLOGY:0000000\]"
@@ -20,25 +37,36 @@ extract_ont_id <- function(x){
 #' @export
 convert_GRDI_ont_to_vmr_ids <-
   function(db, x,
-           ont_table = c('ontology_terms', 'countries', 'state_province_regions',
-                         'host_organisms', 'microbes')){
+           ont_table = c('ontology_terms', 
+                         'countries', 
+                         'state_province_regions',
+                         'host_organisms', 
+                         'microbes')){
   ont_table <- match.arg(ont_table)
-
-  get_sql <- glue::glue_sql(.con=db, "SELECT id, ontology_id FROM ", ont_table,
-                             " WHERE ontology_id = $1")
-
+  # Build the query
+  get_sql <- glue::glue_sql(.con=db, "SELECT id, ontology_id FROM ", ont_table, " WHERE ontology_id = $1")
+  # Extract just the ontology ids from the vectors to query
   ids <- extract_ont_id(x)
+  # Conver to factor to limit query to unique values
   fac <- factor(ids)
-  levels(fac)
-
+  # Perform the query
   res_df <- dbGetQuery(db, get_sql,  list(levels(fac)))
-
+  # Check to make sure that all terms are found in the VMR, else we will end 
+  # up with silent NULLs inserted
+  in_vmr <- levels(fac) %in% res_df$ontology_id
+  if ( !all(in_vmr) ){
+    stop("Terms not found in VMR: ", paste0(levels(fac)[!in_vmr], collapse = ", "))
+  }
+  # Convert the original vector into the VMR ids, and make sure its an integer.
   res <-
     factor(fac, levels = res_df$ontology_id, labels = res_df$id) |>
-    as.character() |> as.integer()
-
+    as.character() |> 
+    as.integer()
+  # Warn if there are NAs 
+  if (anyNA(res)){
+    message("Warning: NA's detected during ontology conversion: ", sum(is.na(res)))
+  }
   return(res)
-
 }
 
 get_template_map <- function(db){
