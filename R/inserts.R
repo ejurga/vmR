@@ -41,7 +41,6 @@ new_samples <- function(db, sample_names, project_id){
   
 }
 
-
 #' Insert alternative sample ids
 #' 
 #' @export
@@ -59,7 +58,6 @@ insert_alternative_sample_ids <- function(db, vmr_sample_id, alt_id, note = NA){
   x <- dbExecute(db, sql, list(vmr_sample_id, alt_id, note))
   return(paste("Inserted", x, "alternative sample ids to DB")) 
 }
-
 
 #' Get id for contact information, inserting into the DB if necessary
 #'
@@ -100,24 +98,6 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
     return_id <- id$id
   }
 }
-
-#' Set user isolate IDs to VMR ids from all possible alternative ids
-#'
-#' Attempt to use the possible_isolate_names view to set the user 
-#' isolate IDs to VMR isolate_IDs
-#'
-#' @param db [DBI] connection
-#' @param x The vector to attempt to convert to VMR IDs
-#' @export
-#'
-set_vmr_isolate_id_from_alternates <- function(db, x){
-  vmrPos <- dbReadTable(db, "possible_isolate_names") %>% as_tibble()
-  m <- match(x, vmrPos$isolate_collector_id)
-  res <- vmrPos$isolate_id[m]
-  if (anyNA(res)) message("NAs detected, total: ", sum(is.na(res)))
-  return(res)  
-}
-
 
 #' Insert data into collection_information and associated tables
 #'
@@ -198,44 +178,6 @@ insert_geo_loc <- function(db, df){
 
   ids <- sendBindFetch(db = db, sql = sql_str, params = params_no_null,
                        verbose = T)
-}
-
-#' Checks for entry in geo_loc_site and adds a new one if it doesn't exist
-#'
-#' @param db connection to VRM
-#' @param x Vector of GRDI column geo_loc_name (site)
-#'
-#' @export
-check_for_existing_geo_loc_site <- function(db, x){
-
-  fac <- factor(x)
-
-  vals_in_db <- character(0)
-
-  while (!all(levels(fac) %in% vals_in_db)){
-
-    res <-
-      sendBindFetch(db,
-                    sql = "SELECT * FROM geo_loc_name_sites WHERE geo_loc_name_site = $1",
-                    params = list(levels(fac)))
-
-    vals_in_db <- res$geo_loc_name_site
-
-    vals_to_add <- levels(fac)[!levels(fac) %in% vals_in_db]
-    if (length(vals_to_add)>0){
-      message("Values not found, Adding to geo_loc_name_sites: ",
-              paste(vals_to_add, collapse = ", "))
-      insertBind(db,
-                 sql = "INSERT INTO geo_loc_name_sites (geo_loc_name_site) VALUES ($1)",
-                 params = list(vals_to_add))
-    }
-  }
-
-  fixed <-
-    factor(x, levels = res$geo_loc_name_site, labels = res$id) |>
-    as.character() |> as.integer()
-
-  return(fixed)
 }
 
 #' Convenience function to update alternative isolate IDS with notes
