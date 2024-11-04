@@ -1,5 +1,11 @@
 #' Insert new project into the VMR database
 #' 
+#' @inheritParams get_sample_ids
+#' @param sample_plant_id
+#' @param sample_plan_name
+#' @param project_name
+#' @param description
+#' 
 #' @export
 new_project <- function(db, sample_plan_id, sample_plan_name, project_name = NA, 
                         description = NA){
@@ -22,6 +28,7 @@ new_project <- function(db, sample_plan_id, sample_plan_name, project_name = NA,
 
 #' Insert new samples into the samples table
 #' 
+#' @inheritParams get_sample_ids
 #' @param sample_names sample name to insert
 #' @param project_id VMR project ID associated with the sample 
 #' 
@@ -43,6 +50,10 @@ new_samples <- function(db, sample_names, project_id){
 
 #' Insert alternative sample ids
 #' 
+#' @inheritParams get_sample_ids
+#' @param vmr_sample_id vector of VMR sample_ids 
+#' @param alt_id The alternative ids of the samples
+#' @param note A note describing the alternative ID
 #' @export
 insert_alternative_sample_ids <- function(db, vmr_sample_id, alt_id, note = NA){
   
@@ -61,7 +72,7 @@ insert_alternative_sample_ids <- function(db, vmr_sample_id, alt_id, note = NA){
 
 #' Get id for contact information, inserting into the DB if necessary
 #'
-#' @param db [DBI] connection
+#' @inheritParams get_sample_ids
 #' @param lab Laboratory name, passed onto collection_information.laboratory_name
 #' @param name Contact name, passed onto collection_information.contact_name
 #' @param email Contact email, passed onto collection_information.contact_email
@@ -101,11 +112,22 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
 
 #' Insert data into collection_information and associated tables
 #'
-#' Inserts data into the table "collection_information", and the
-#' associated multi-choice tables "sample_purpose" and "sample_activity".
-#'
-#' @param db a [DBI] connection to the VMR
-#' @param df a dataframe of the relevant GRDI fields.
+#' Inserts data into the table "collection_information", 
+#' 
+#' @inheritParams get_sample_ids
+#' @param sample_id 
+#' @param sample_collected_by 
+#' @param contact_information 
+#' @param sample_collection_date
+#' @param sample_collection_date_precision 
+#' @param presampling_activity_details 
+#' @param sample_received_date 
+#' @param original_sample_description 
+#' @param specimen_processing 
+#' @param sample_storage_method 
+#' @param sample_storage_medium 
+#' @param collection_device 
+#' @param collection_method
 #'
 #' @export
 insert_collection_information <- 
@@ -142,7 +164,7 @@ insert_collection_information <-
 #'
 #' Inserts data into the table "geo_loc". 
 #'
-#' @param db a [DBI] connection to the VMR
+#' @inheritParams get_sample_ids
 #' @param country As ontology terms with IDS
 #' @param state_province_region As ontology terms with IDS
 #' @param site as VMR site ID from 
@@ -172,6 +194,11 @@ insert_geo_loc <- function(db, sample_id,
 
 #' Convenience function to update alternative isolate IDS with notes
 #'
+#' @inheritParams get_sample_ids
+#' @param iso_ids user defined user ids
+#' @param alt_ids alternative isolate id to add
+#' @param notes notes for the alternative id
+#' 
 #' @export
 insert_alternative_isolate_ids <- function(db, iso_ids, alt_ids, notes){
   dbExecute(
