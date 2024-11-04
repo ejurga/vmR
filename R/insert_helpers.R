@@ -1,3 +1,37 @@
+#' Insert values into one of the common-format multi-choice metadata tables 
+#' 
+#' Currently, the GRDI schema allows some fields to be populated with multiple
+#' values. These fields are implemented in the database as their own tables.
+#' These tables are all similar in their structure, so this convenience
+#' function quickly populates these tables given the values in the GRDI fields.
+#' The function assumes that the values are separated wither with
+#' "|", or a ";"
+#'
+#' @param db [DBI] connection to VMR
+#' @param ids a vector of the foreign-key ids of the table that the multi-choice 
+#'            table is related by.
+#' @param vals a vector of values, of same length as ids, that are to be inserted 
+#'             as values into the multi-choice table
+#' @param table The name of the destination multi-choice table
+#' @param is_ontology Are the values GRDI ontology terms?
+#' @export
+insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = FALSE){
+
+  df_long <- 
+    tibble(id = ids, vals = vals) %>%
+    separate_longer_delim(vals, regex("\\s{0,1}[|;]\\s{0,1}"))
+
+  if (is_ontology==TRUE){
+    df_long$vals <- convert_GRDI_ont_to_vmr_ids(db, df_long$vals)
+  }
+
+  insert_sql <- glue::glue_sql("INSERT INTO", table, "VALUES ($1, $2)", .sep = " ")
+  
+  res <- dbExecute(db, insert_sql, list(df_long$id, df_long$vals))
+  message("Inserted ", res, " record into multi-choice table ", table)
+
+}
+
 #' Convert a function's arguments into a list of vectors of same length
 #' 
 #' Input the `environment()` of a function to return the parameters as a 
@@ -67,3 +101,4 @@ make_insert_sql <- function(table_name, field_names){
 make_sql_params <- function(n){
   sprintf('$%i', 1:n) |> glue::glue_sql_collapse(sep = ", ")
 }
+

@@ -109,36 +109,6 @@ insert_into_multi_choice_table <- function(db, df, table){
 
 #' Populate a "multi-choice" table in the VMR
 #'
-#' Currently, the GRDI schema allows some fields to be populated with multiple
-#' values. These fields are implemented in the database as their own tables.
-#' These tables are all similar in their structure, so this convenience
-#' function quickly populates these tables given the values in the GRDI fields.
-#' The function assumes that the values are separated wither with
-#' "|", or a ";"
-#'
-#' @param db [DBI] connection to VMR
-#' @param df The working dataframe that at least contains the GRDI column, as
-#'  well as the id field that the multi-choice table will use as a foreign key.
-#' @param column str, the name of the GRDI column that can take on multiple
-#'  values
-#'
-#' @export
-transform_and_insert_multi_choice_column <- function(db, df, column){
-
-  map <- get_mapping_for_one_col(db, column)
-
-  if (map$is_multi_choice){
-    df <- seperate_column_into_longform(df, column)
-  } else {
-    stop("selected column is not multi-choice according to mapping")
-  }
-
-  if (map$is_lookup==TRUE){
-    df[[column]] <- convert_GRDI_ont_to_vmr_ids(db, df[[column]])
-  }
-  message("Inserting into ", map$vmr_table)
-  insert_into_multi_choice_table(db, df, table = map$vmr_table)
-}
 
 #' Renaming a GRDI formatted dataframe to a VMR table
 #'

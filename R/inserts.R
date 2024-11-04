@@ -145,7 +145,7 @@ insert_collection_information <-
            collection_method = NA){
     
     sql_args <- sql_args_to_uniform_list(environment())
-    insert_sql <- make_insert_sql(table_name = "collection_information", field_names = names(sql_arg))
+    insert_sql <- make_insert_sql(table_name = "collection_information", field_names = names(sql_args))
     params <- sql_args_to_ontology_ids(db = db,  
                                        sql_arguments = sql_args, 
                                        ontology_columns = c("sample_collected_by",  
@@ -155,18 +155,8 @@ insert_collection_information <-
                                                             "collection_method"))
     res <- dbExecute(db, insert_sql, unname(params))
     message("Inserted ", res, " records into collection_information")
-    # Now For the multi-choice tables
-    populate_multi_choice_table(db = db, df = df,
-                                main_table = "collection_information",
-                                grdi_col = "purpose_of_sampling",
-                                col_table = "sample_purpose")
-    populate_multi_choice_table(db = db, df = df,
-                                main_table = "collection_information",
-                                grdi_col = "presampling_activity",
-                                col_table = "sample_activity")
-
-    message("Done, call dbCommit or dbRollback")
 }
+
 
 #' Insert data into geo_loc and associated tables
 #'
