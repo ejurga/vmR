@@ -1,3 +1,28 @@
+#' Take the common and scientific name columns and convert to a single ID 
+#' 
+#' Also checks to make sure that those two columns were the same ontology 
+#' term, otherwise, it is probably an error. 
+#' 
+#' @inheritParams get_sample_ids
+#' @param common_name host_common_name field 
+#' @param scientific_name host_scientific_name field
+#' 
+#' @export
+host_organisms_to_ids <- function(db, common_name, scientific_name){
+  common_ids <- extract_ont_id(x = common_name)
+  science_ids <- extract_ont_id(x = scientific_name)
+  is.eq <- common_ids==science_ids
+  if (!all(is.eq, na.rm = TRUE)){
+    stop("common name and scientific name ontologies mismatched")
+  }
+  # Replace any NAs in one vector with the value from the other
+  ontology_terms <- ifelse(is.na(common_name), scientific_name, common_name)
+  # Get the Ids
+  host_org_ids <- convert_GRDI_ont_to_vmr_ids(db, ontology_terms, ont_table = "host_organisms")
+  return(host_org_ids)
+}
+
+
 #' Insert values into one of the common-format multi-choice metadata tables 
 #' 
 #' Currently, the GRDI schema allows some fields to be populated with multiple
@@ -19,17 +44,19 @@ insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = F
 
   df_long <- 
     tibble(id = ids, vals = vals) %>%
-    separate_longer_delim(vals, regex("\\s{0,1}[|;]\\s{0,1}"))
-
-  if (is_ontology==TRUE){
-    df_long$vals <- convert_GRDI_ont_to_vmr_ids(db, df_long$vals)
-  }
-
-  insert_sql <- glue::glue_sql("INSERT INTO", table, "VALUES ($1, $2)", .sep = " ")
+    separate_longer_delim(vals, regex("\\s{0,1}[|;]\\s{0,1}")) %>% 
+    filter(!is.na(vals))
   
-  res <- dbExecute(db, insert_sql, list(df_long$id, df_long$vals))
-  message("Inserted ", res, " record into multi-choice table ", table)
-
+  if (nrow(df_long)==0){ 
+    message("No values for table ", table)
+  } else { 
+    if (is_ontology==TRUE){
+      df_long$vals <- convert_GRDI_ont_to_vmr_ids(db, df_long$vals)
+    }
+    insert_sql <- glue::glue_sql("INSERT INTO", table, "VALUES ($1, $2)", .sep = " ")
+    res <- dbExecute(db, insert_sql, list(df_long$id, df_long$vals))
+    message("Inserted ", res, " record into multi-choice table ", table)
+  }
 }
 
 #' Convert a function's arguments into a list of vectors of same length
