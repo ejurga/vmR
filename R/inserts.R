@@ -232,7 +232,8 @@ insert_env_data <- function(db,
 #' 
 #' @export
 insert_env_multi_choices <- 
-  function(env_data_id,
+  function(db,
+           env_data_id,
            animal_or_plant_population = NA, 
            available_data_types = NA,
            environmental_material_constituent = NA,
@@ -253,11 +254,11 @@ insert_env_multi_choices <-
 
     # Insert into all the tables
     for (col in names(argg)){
-     insert_into_multi_choice_table(vmr, 
-                                     ids = env_data_id, 
-                                     table = table_map[[col]]$vmr_table, 
-                                     vals = argg[[col]],
-                                     is_ontology = table_map[[col]]$is_ontology)
+     insert_into_multi_choice_table(db, 
+                                    ids = env_data_id, 
+                                    table = table_map[[col]]$vmr_table, 
+                                    vals = argg[[col]],
+                                    is_ontology = table_map[[col]]$is_ontology)
     }
   }
 
@@ -293,7 +294,8 @@ insert_host_data <-
 #' 
 #' @export 
 insert_anatomical_data <- 
-  function(sample_id,
+  function(db,
+           sample_id,
            anatomical_region = NA){
   
     sql_args <- sql_args_to_uniform_list(environment())
@@ -309,7 +311,8 @@ insert_anatomical_data <-
 #' 
 #' @export
 insert_anatomical_multi_choices <- 
-  function(anatomy_ids, 
+  function(vmr,
+           anatomy_ids, 
            body_product = NA, 
            anatomical_material = NA, 
            anatomical_part = NA){
@@ -324,11 +327,11 @@ insert_anatomical_multi_choices <-
 
     # Insert into all the tables
     for (col in names(argg)){
-     insert_into_multi_choice_table(vmr, 
-                                     ids = anatomy_ids, 
-                                     table = table_map[[col]]$vmr_table, 
-                                     vals = argg[[col]],
-                                     is_ontology = table_map[[col]]$is_ontology)
+     insert_into_multi_choice_table(db, 
+                                    ids = anatomy_ids, 
+                                    table = table_map[[col]]$vmr_table, 
+                                    vals = argg[[col]],
+                                    is_ontology = table_map[[col]]$is_ontology)
     }
   }
 
