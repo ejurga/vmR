@@ -265,7 +265,8 @@ insert_env_multi_choices <-
 #' 
 #' @export
 insert_host_data <- 
-  function(sample_id, 
+  function(db,
+           sample_id, 
            host_organism = NA,
            host_ecotype = NA,
            host_breed = NA,
