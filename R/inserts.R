@@ -242,7 +242,7 @@ insert_env_multi_choices <-
            weather_type = NA){
  
    argg <- c(as.list(environment()))
-   argg <- argg[!names(argg)=="env_data_id"] 
+   argg <- argg[!names(argg) %in% c("env_data_id", "db")] 
     # Mapping                  
    table_map <- list(
      animal_or_plant_population =  list(vmr_table = "environmental_data_animal_plant",   is_ontology = TRUE), 
@@ -311,14 +311,14 @@ insert_anatomical_data <-
 #' 
 #' @export
 insert_anatomical_multi_choices <- 
-  function(vmr,
+  function(db,
            anatomy_ids, 
            body_product = NA, 
            anatomical_material = NA, 
            anatomical_part = NA){
            
    argg <- c(as.list(environment()))
-   argg <- argg[!names(argg)=="anatomy_ids"] 
+   argg <- argg[!names(argg) %in% c("anatomy_ids", "db")] 
     # Mapping                  
    table_map <- list(
      body_product =  list(vmr_table = "anatomical_data_body",   is_ontology = TRUE), 
