@@ -108,6 +108,26 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
   }
 }
 
+#' Replace site values with the geo_loc_site ID, or insert and return if not present
+#' 
+#' @inheritParams get_sample_ids
+#' @param x vector of string-form geo_loc_site names
+#' 
+insert_or_return_geo_site <- function(db, x){
+  for (site in unique(x)){
+    id <- dbGetQuery(db, 
+                     "SELECT id FROM geo_loc_name_sites WHERE geo_loc_name_site = $1", 
+                     list(site))$id
+    if (length(id)==0){
+      message("Inserting ", site, " into geo_loc_name_sites")
+      id <- dbGetQuery(db,
+                       "INSERT INTO geo_loc_name_sites (geo_loc_name_site) VALUES ($1) RETURNING id",  
+                       list(site))$id
+      }
+    x[x==site] <- id
+  }
+  return(as.integer(x))
+}
 #' Insert data into collection_information and associated tables
 #'
 #' Inserts data into the table "collection_information", 
