@@ -113,6 +113,7 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
 #' @inheritParams get_sample_ids
 #' @param x vector of string-form geo_loc_site names
 #' 
+#' @export
 insert_or_return_geo_site <- function(db, x){
   for (site in unique(x)){
     id <- dbGetQuery(db, 
