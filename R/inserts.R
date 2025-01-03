@@ -219,7 +219,7 @@ insert_food_data <-
       convert_GRDI_ont_to_vmr_ids(db, sql_args$food_product_origin_country, ont_table = "countries")
     
     res <- dbExecute(db, insert_sql, unname(sql_args))
-    message("Inserted ", res, " records into collection_information")
+    message("Inserted ", res, " records into food_data table")
   }
 
 #' Insert data into the environmental data table
