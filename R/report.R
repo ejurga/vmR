@@ -33,11 +33,42 @@ open_sheet <- function(file, sheet_name){
 #' 
 #' @param x a vector of data
 #' 
-#' @export
 tally_values_to_string <- function(x){
   vals <- table(x, useNA = "ifany") 
-  names_w_colon <- paste0(names(vals), ":")
-  vals <- paste(unname(vals), ";")
-  res <- paste(c(rbind(names_w_colon, vals)), collapse = ' ')
+  names_w_colon <- paste0("   ", names(vals), ":")
+  vals <- paste0(unname(vals), "\n")
+  res <- paste0(c(rbind(names_w_colon, vals)), collapse = ' ')
   return(res)
 }
+
+#' Print out a tally of unique values across all columns in a dataframe
+#' 
+#' Except for ID columns!
+#' 
+#' @param df dataframe
+#' 
+#' @export
+print_tallies_of_columns <- function(df){
+  cols <- colnames(df)
+  cols <- cols[!grepl(x=cols, "[iI][dD]$")]
+  na_cols <- c()
+  for (col in cols){
+    # Check if date, and if so, print out a range instead
+    if ( grepl(x=col, pattern = "date$") & !all(is.na(df[[col]])) ){
+      dates <- as_date(df[[col]])
+      cat(col, "\n")
+      cat("Date range is:", paste(range(dates), collapse = " - "))
+      cat(", and there are", length(unique(dates)), "unique dates \n \n")
+    # Add to NA list if the column is all NA
+    } else if ( all(is.na(df[[col]])) ){
+      na_cols <- c(na_cols, col) 
+    # Otherwise, get the tallies and print them
+    } else {
+      t <- table(df[[col]], useNA = "ifany")
+      cat(col, "\n")
+      cat(tally_values_to_string(df[col]), "\n")
+    }
+  }
+  cat("These columns are empty:", paste(na_cols, collapse = ", "))
+}
+
