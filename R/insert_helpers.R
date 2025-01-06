@@ -104,7 +104,8 @@ sql_args_to_ontology_ids <- function(db, ontology_columns, sql_arguments){
 #' they all be the same length 
 #' 
 if_len_one_rep <- function(x){
-  for (i in which(lengths(x)==1)){
+  for (i in which(lengths(x)<=1)){
+    if (is.null(x[[i]])) x[[i]] <- NA
     x[[i]] <- rep(x[[i]], max(lengths(x))) 
   }
   return(x)
