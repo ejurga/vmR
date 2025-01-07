@@ -21,7 +21,7 @@ get_sample_ids <- function(db, sample_names){
 #'
 #' @export
 extract_ont_id <- function(x){
-  sub(x = x, "^.+\\[([A-Za-z_]+)[:_]([A-Z0-9]+)\\]", "\\1:\\2")
+  sub(x = x, "^.{0,}\\[([A-Za-z_]+)[:_]([A-Z0-9]+)\\]", "\\1:\\2")
 }
 
 #' Convert GRDI ontology term into VMR ontology indexes
@@ -43,6 +43,10 @@ convert_GRDI_ont_to_vmr_ids <-
                          'host_organisms', 
                          'microbes')){
   ont_table <- match.arg(ont_table)
+  # Check if all is NA, and exit if so. 
+  if ( all(is.na(x)) ){ 
+    return(x) 
+  }
   # Build the query
   get_sql <- glue::glue_sql(.con=db, "SELECT id, ontology_id FROM ", ont_table, " WHERE ontology_id = $1")
   # Extract just the ontology ids from the vectors to query

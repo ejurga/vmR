@@ -69,6 +69,6 @@ print_tallies_of_columns <- function(df){
       cat(tally_values_to_string(df[col]), "\n")
     }
   }
-  cat("These columns are empty:", paste(na_cols, collapse = ", "))
+  cat("These columns are empty:", paste(na_cols, collapse = ", \n"))
 }
 

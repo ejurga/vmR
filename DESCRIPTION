@@ -1,6 +1,6 @@
 Package: vmR
 Title: A suite of R tools to interact with the VMR
-Version: 0.3.3
+Version: 0.3.4
 Authors@R: 
     person("Emil", "Jurga", ,"emil.jurga@phac-aspc.gc.ca", role = c("aut", "cre"))
 Description: R tools to interface with the VMR

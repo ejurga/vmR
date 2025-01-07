@@ -43,18 +43,20 @@ host_organisms_to_ids <- function(db, common_name, scientific_name){
 insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = FALSE){
 
   df_long <- 
-    tibble(id = ids, vals = vals) %>%
-    separate_longer_delim(vals, regex("\\s{0,1}[|;]\\s{0,1}")) %>% 
+    tibble(id = ids, term_list = vals) %>%
+    mutate(vals = str_extract_all(string = vals, "\\[([A-Za-z_]+)[:_]([A-Z0-9]+)\\]")) %>%
+    unnest(vals) %>% 
     filter(!is.na(vals))
   
   if (nrow(df_long)==0){ 
     message("No values for table ", table)
   } else { 
     if (is_ontology==TRUE){
-      df_long$vals <- convert_GRDI_ont_to_vmr_ids(db, df_long$vals)
+      message("Inserting into ", table)
+      df_long$ont_ids <- convert_GRDI_ont_to_vmr_ids(db, df_long$vals)
     }
     insert_sql <- glue::glue_sql("INSERT INTO", table, "VALUES ($1, $2)", .sep = " ")
-    res <- dbExecute(db, insert_sql, list(df_long$id, df_long$vals))
+    res <- dbExecute(db, insert_sql, list(df_long$id, df_long$ont_ids))
     message("Inserted ", res, " record into multi-choice table ", table)
   }
 }
