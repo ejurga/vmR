@@ -1,8 +1,6 @@
 
 #' Report and Insert project information
 #' 
-#' @param sample_df samples
-#' 
 #' @export
 repIns_project <- function(db, sample_df){
 
@@ -28,10 +26,6 @@ repIns_project <- function(db, sample_df){
 } 
 
 #' Report and insert collection info
-#' 
-#' @param db
-#' @param sample_df 
-#' @param contact_id
 #' 
 #' @export
 repIns_collection_info <- function(db, sample_df, contact_id){
