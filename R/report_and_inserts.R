@@ -106,8 +106,6 @@ repIns_food_data <- function(db, sample_df){
   food <-
     sample_df %>% 
     select(sample_id, matches("food")) %>%
-    mutate(across(matches("food"), 
-                  ~replace(.x, which(.x %in% grdiamR::get_null_value()), NA))) %>%
     filter(!if_all(matches("food"), ~is.na(.x)))
   
   print_tallies_of_columns(food)
@@ -148,8 +146,6 @@ repIns_host <- function(db, sample_df, host_df){
     sample_df %>% 
     select(sample_collector_sample_ID, sample_id, matches("host")) %>% 
     left_join(host_df, by = "sample_collector_sample_ID") %>%
-    mutate(across(everything(), 
-                  ~replace(.x, which(.x %in% grdiamR::get_null_value()), NA))) %>%
     filter(!if_all(everything(), ~is.na(.x)))
   
   host$host_organism_ids <- 
@@ -186,8 +182,6 @@ repIns_env <- function(db, sample_df, env_df){
     select(sample_id, environmental_material, environmental_site, 
            animal_or_plant_population, available_data_types) %>%
     left_join(env_df, by = "sample_id", relationship = "one-to-one") %>%
-    mutate(across(everything(), 
-                  ~replace(.x, which(.x %in% grdiamR::get_null_value()), NA))) %>%
     filter(!if_all(everything(), ~is.na(.x)))
 
   print_tallies_of_columns(env)
@@ -228,8 +222,6 @@ repIns_ana <- function(db, sample_df){
     sample_df %>% 
     select(sample_id, anatomical_region, body_product, anatomical_material, 
            anatomical_part) %>% 
-    mutate(across(everything(), 
-                  ~replace(.x, which(.x %in% grdiamR::get_null_value()), NA))) %>%
     filter(!if_all(-sample_id, ~is.na(.x)))
 
   print_tallies_of_columns(ana)
