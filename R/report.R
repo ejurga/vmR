@@ -22,6 +22,7 @@ open_sheet <- function(file, sheet_name){
                         startRow = 2, 
                         sep.names = '_', 
                         detectDates = TRUE) %>% as_tibble()
+  if (nrow(df)==0) df <- mutate(df, across(everything(), ~as.character(.x)))
   names(df) <- clean_names(names(df))
   return(df)
 }
