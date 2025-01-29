@@ -67,7 +67,7 @@ samples_by_group <- function(file) {
   grdi_null <- grepl(x=same$Value, "^Not ")
   same_sorted <-
     same[c(which(!(is_na | grdi_null)), which(grdi_null), which(is_na)),]
-  df_rest <- full %>% select(-any_of(same_sorted$Field))
+  df_rest <- df %>% select(-any_of(same_sorted$Field))
   df_groups <- get_distinct_by_sample_description(df_rest, geo_loc_name_site)
   return(list(grouped_by=df_groups, same_df=same_sorted))
 }
