@@ -58,6 +58,7 @@ get_distinct_by_sample_description <- function(df, ...) {
 #'
 #' @param file The path to the GRDI excel template
 #'
+#' @export
 samples_by_group <- function(file) {
 
   df <- grdi_excel_to_sample_metadata_df(file)
@@ -79,6 +80,7 @@ samples_by_group <- function(file) {
 #'
 #' @param file The path to the GRDI excel template
 #'
+#' @export
 grdi_excel_to_sample_metadata_df <- function(file) {
   samples <- open_sheet(file = file, sheet_name = "Sample Collection & Processing")
   host <- open_sheet(file = file, sheet_name = "Host Information")
@@ -98,6 +100,8 @@ grdi_excel_to_sample_metadata_df <- function(file) {
 #' @param title Title of the excel workbook
 #' @param same_df The same_df dataframe returned from [samples_by_group]
 #' @param grouped_df The grouped_df dataframe returned from [samples_by_group]
+#'
+#' @export
 save_report_to_excel_workbook <- function(file, title, same_df, grouped_df){
   wb <- openxlsx::createWorkbook(creator = "Emil Jurga", title = "WP3.2 Data for review")
   openxlsx::addWorksheet(wb = wb, sheetName = "Fields All Same")
