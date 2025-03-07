@@ -4,7 +4,7 @@
 \alias{repIns_project}
 \title{Report and Insert project information}
 \usage{
-repIns_project(db, sample_df)
+repIns_project(db, df)
 }
 \description{
 Report and Insert project information

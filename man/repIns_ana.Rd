@@ -4,7 +4,7 @@
 \alias{repIns_ana}
 \title{Report and insert anatomical data}
 \usage{
-repIns_ana(db, sample_df)
+repIns_ana(db, df)
 }
 \description{
 Report and insert anatomical data

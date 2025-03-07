@@ -4,7 +4,7 @@
 \alias{repIns_host}
 \title{Report and insert host data}
 \usage{
-repIns_host(db, sample_df, host_df)
+repIns_host(db, df)
 }
 \description{
 Report and insert host data

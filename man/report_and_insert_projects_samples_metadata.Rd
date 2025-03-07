@@ -4,7 +4,7 @@
 \alias{report_and_insert_projects_samples_metadata}
 \title{Insert and reporting function for sample metadata}
 \usage{
-report_and_insert_projects_samples_metadata(db, sample_df, host_df, env_df)
+report_and_insert_projects_samples_metadata(db, df, commit = FALSE)
 }
 \description{
 Insert and reporting function for sample metadata

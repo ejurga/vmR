@@ -4,7 +4,7 @@
 \alias{repIns_geo_data}
 \title{Report and insert geo data}
 \usage{
-repIns_geo_data(db, sample_df)
+repIns_geo_data(db, df)
 }
 \description{
 Report and insert geo data

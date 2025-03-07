@@ -4,7 +4,7 @@
 \alias{repIns_food_data}
 \title{Report and insert food data}
 \usage{
-repIns_food_data(db, sample_df)
+repIns_food_data(db, df)
 }
 \description{
 Report and insert food data

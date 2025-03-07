@@ -4,7 +4,7 @@
 \alias{repIns_collection_info}
 \title{Report and insert collection info}
 \usage{
-repIns_collection_info(db, sample_df, contact_id)
+repIns_collection_info(db, df, contact_id)
 }
 \description{
 Report and insert collection info

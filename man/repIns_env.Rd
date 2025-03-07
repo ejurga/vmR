@@ -4,7 +4,7 @@
 \alias{repIns_env}
 \title{Report and insert environmental data}
 \usage{
-repIns_env(db, sample_df, env_df)
+repIns_env(db, df)
 }
 \description{
 Report and insert environmental data
