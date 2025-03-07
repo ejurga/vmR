@@ -56,12 +56,10 @@ get_distinct_by_sample_description <- function(df, ...) {
 
 #' Return distinct rows by original_sample_description AND fields with a single value
 #'
-#' @param file The path to the GRDI excel template
+#' @param df Dataframe of the GRDI template with all the sample columns
 #'
 #' @export
-samples_by_group <- function(file) {
-
-  df <- grdi_excel_to_sample_metadata_df(file)
+samples_by_group <- function(df) {
 
   same <- cols_all_the_same(df)
   is_na <- is.na(same$Value)
@@ -83,13 +81,16 @@ samples_by_group <- function(file) {
 #' @export
 grdi_excel_to_sample_metadata_df <- function(file) {
   samples <- open_sheet(file = file, sheet_name = "Sample Collection & Processing")
-  host <- open_sheet(file = file, sheet_name = "Host Information")
-  env_data <- open_sheet(file = file, sheet_name = "Environmental conditions")
-  
+  host <- 
+    open_sheet(file = file, sheet_name = "Host Information") %>% 
+    select(-alternative_sample_ID)
+  env_data <- 
+    open_sheet(file = file, sheet_name = "Environmental conditions") %>%
+    select(-alternative_sample_ID)
   full <-
     samples %>% left_join(host, by = "sample_collector_sample_ID") %>%
-    left_join(env_data, by = "sample_collector_sample_ID")
-
+    left_join(env_data, by = "sample_collector_sample_ID") %>%
+    mutate(across(where(is.character), ~trimws(.x)))
   return(full)
 }
 

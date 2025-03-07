@@ -9,8 +9,14 @@
 #' 
 #' @export
 host_organisms_to_ids <- function(db, common_name, scientific_name){
+ 
+  # Remove grdi NULLs and set to NA 
+  common_name <- set_grdi_nulls_to_NA(x = common_name)
+  scientific_name <- set_grdi_nulls_to_NA(x = scientific_name)
+  # Get only the ontology ids 
   common_ids <- extract_ont_id(x = common_name)
   science_ids <- extract_ont_id(x = scientific_name)
+  # Are they equal?
   is.eq <- common_ids==science_ids
   if (!all(is.eq, na.rm = TRUE)){
     stop("common name and scientific name ontologies mismatched")
@@ -22,6 +28,11 @@ host_organisms_to_ids <- function(db, common_name, scientific_name){
   return(host_org_ids)
 }
 
+#' Replace GRDI NULLs with NA 
+set_grdi_nulls_to_NA <- function(x){
+  x[grepl(x=x, "^Not ")] <- NA
+  return(x)
+}
 
 #' Insert values into one of the common-format multi-choice metadata tables 
 #' 

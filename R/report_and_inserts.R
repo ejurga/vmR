@@ -2,10 +2,10 @@
 #' Report and Insert project information
 #' 
 #' @export
-repIns_project <- function(db, sample_df){
+repIns_project <- function(db, df){
 
   pro <-
-    sample_df %>% 
+    df %>% 
     select(sample_collection_project_name, sample_plan_name, sample_plan_ID) %>% 
     distinct()
 
@@ -19,8 +19,8 @@ repIns_project <- function(db, sample_df){
   
   print(paste("Inserted", x, "record into Projects"))
 
-  pro <- dbGetQuery(db, "SELECT id FROM projects WHERE sample_plan_name = $1",  
-                       list(pro$sample_plan_name))
+  pro <- dbGetQuery(db, "SELECT id FROM projects WHERE project_name = $1",  
+                       list(pro$sample_collection_project_name))
   
   return(pro$id)
 } 
@@ -28,7 +28,7 @@ repIns_project <- function(db, sample_df){
 #' Report and insert collection info
 #' 
 #' @export
-repIns_collection_info <- function(db, sample_df, contact_id){
+repIns_collection_info <- function(db, df, contact_id){
 
   col_columns <- c(
     "sample_collected_by", "sample_collection_date", 
@@ -38,7 +38,7 @@ repIns_collection_info <- function(db, sample_df, contact_id){
     "purpose_of_sampling", "presampling_activity")
 
   col_info <- 
-    sample_df %>% 
+    df %>% 
     select(sample_id, sample_collector_sample_ID, all_of(col_columns))
   
   print_tallies_of_columns(col_info)
@@ -70,13 +70,13 @@ repIns_collection_info <- function(db, sample_df, contact_id){
   
   insert_into_multi_choice_table(db, 
                                  ids = collection_ids, 
-                                 vals = samples$purpose_of_sampling, 
+                                 vals = df$purpose_of_sampling, 
                                  table = "sample_purposes", 
                                  is_ontology = TRUE)
 
   insert_into_multi_choice_table(db, 
                                  ids = collection_ids, 
-                                 vals = samples$presampling_activity, 
+                                 vals = df$presampling_activity, 
                                  table = "sample_activity", 
                                  is_ontology = TRUE)
 }
@@ -84,8 +84,8 @@ repIns_collection_info <- function(db, sample_df, contact_id){
 #' Report and insert geo data
 #' 
 #' @export
-repIns_geo_data <- function(db, sample_df){
-  geo <- sample_df %>% select(sample_id, matches("^geo"))
+repIns_geo_data <- function(db, df){
+  geo <- df %>% select(sample_id, matches("^geo"))
   print_tallies_of_columns(geo)
   geo$site_ids <- insert_or_return_geo_site(db, geo$geo_loc_name_site)
   x <- insert_geo_loc(db, 
@@ -101,10 +101,10 @@ repIns_geo_data <- function(db, sample_df){
 #' Report and insert food data
 #' 
 #' @export
-repIns_food_data <- function(db, sample_df){
+repIns_food_data <- function(db, df){
 
   food <-
-    sample_df %>% 
+    df %>% 
     select(sample_id, matches("food")) %>%
     filter(!if_all(matches("food"), ~is.na(.x)))
   
@@ -140,13 +140,11 @@ repIns_food_data <- function(db, sample_df){
 #' Report and insert host data
 #' 
 #' @export
-repIns_host <- function(db, sample_df, host_df){
+repIns_host <- function(db, df){
   
   host <-
-    sample_df %>% 
-    select(sample_collector_sample_ID, sample_id, matches("host")) %>% 
-    left_join(host_df, by = "sample_collector_sample_ID") %>%
-    filter(!if_all(everything(), ~is.na(.x)))
+    df %>% 
+    select(sample_collector_sample_ID, sample_id, matches("host"))
   
   host$host_organism_ids <- 
     host_organisms_to_ids(db, 
@@ -174,15 +172,25 @@ repIns_host <- function(db, sample_df, host_df){
 #' Report and insert environmental data
 #' 
 #' @export
-repIns_env <- function(db, sample_df, env_df){
-  env_df$sample_id <- get_sample_ids(db, env_data$sample_collector_sample_ID)
-
+repIns_env <- function(db, df){
+  
   env <- 
-    sample_df %>% 
-    select(sample_id, environmental_material, environmental_site, 
-           animal_or_plant_population, available_data_types) %>%
-    left_join(env_df, by = "sample_id", relationship = "one-to-one") %>%
-    filter(!if_all(everything(), ~is.na(.x)))
+    df %>% 
+    select(sample_id, 
+           animal_or_plant_population, 
+           available_data_types,
+           environmental_material,
+           environmental_site, 
+           weather_type, 
+           air_temperature,
+           air_temperature_units,
+           water_temperature,
+           water_temperature_units,
+           sediment_depth,
+           sediment_depth_units,
+           water_depth,
+           water_depth_units,
+           available_data_types_details)
 
   print_tallies_of_columns(env)
 
@@ -196,7 +204,7 @@ repIns_env <- function(db, sample_df, env_df){
                        sediment_depth_units = env$sediment_depth_units,
                        water_depth = env$water_depth,
                        water_depth_units = env$water_depth_units,
-                       available_data_type_details = env$available_data_type_details)
+                       available_data_type_details = env$available_data_types_details)
   print(paste("Inserted", x, "into environmental data table"))
   
   env$id <- 
@@ -216,10 +224,10 @@ repIns_env <- function(db, sample_df, env_df){
 #' Report and insert anatomical data 
 #' 
 #' @export
-repIns_ana <- function(db, sample_df){
+repIns_ana <- function(db, df){
   
   ana <-
-    sample_df %>% 
+    df %>% 
     select(sample_id, anatomical_region, body_product, anatomical_material, 
            anatomical_part) %>% 
     filter(!if_all(-sample_id, ~is.na(.x)))
