@@ -4,7 +4,7 @@
 \alias{samples_by_group}
 \title{Return distinct rows by original_sample_description AND fields with a single value}
 \usage{
-samples_by_group(df)
+samples_by_group(df, ...)
 }
 \arguments{
 \item{df}{Dataframe of the GRDI template with all the sample columns}
