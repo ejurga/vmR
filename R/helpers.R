@@ -1,3 +1,18 @@
+#' amr_regexes
+#'
+#' Rerturn a vector to filter out AMR columns
+#'
+#' @export
+amr_regexes <-function(){
+    c("_resistance_phenotype$",
+      "_measurement(_units|_sign){0,1}$",
+      "_laboratory_typing_[a-z_]+$",
+      "_vendor_name$",
+      "_testing_standard[a-z_]{0,}$",
+      "_breakpoint$")
+}
+
+
 #' Get sample ids from the sample_collector_sample_ids
 #' 
 #' @param db [DBI] connection to VMR
