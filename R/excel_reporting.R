@@ -59,15 +59,16 @@ get_distinct_by_sample_description <- function(df, ...) {
 #' @param df Dataframe of the GRDI template with all the sample columns
 #'
 #' @export
-samples_by_group <- function(df) {
+samples_by_group <- function(df, ...) {
 
   same <- cols_all_the_same(df)
   is_na <- is.na(same$Value)
   grdi_null <- grepl(x=same$Value, "^Not ")
   same_sorted <-
     same[c(which(!(is_na | grdi_null)), which(grdi_null), which(is_na)),]
+  same_sorted <- same_sorted %>% filter(Field!="original_sample_description")
   df_rest <- df %>% select(-any_of(same_sorted$Field))
-  df_groups <- get_distinct_by_sample_description(df_rest, geo_loc_name_site)
+  df_groups <- get_distinct_by_sample_description(df_rest, ...)
   return(list(grouped_by=df_groups, same_df=same_sorted))
 }
 
