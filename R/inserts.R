@@ -115,19 +115,25 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
 #' 
 #' @export
 insert_or_return_geo_site <- function(db, x){
-  for (site in unique(x)){
-    id <- dbGetQuery(db, 
-                     "SELECT id FROM geo_loc_name_sites WHERE geo_loc_name_site = $1", 
-                     list(site))$id
-    if (length(id)==0){
-      message("Inserting ", site, " into geo_loc_name_sites")
-      id <- dbGetQuery(db,
-                       "INSERT INTO geo_loc_name_sites (geo_loc_name_site) VALUES ($1) RETURNING id",  
+  
+  if (all(is.na(x))) { 
+    return(x)
+  } else {
+    sites <- unique(x)
+    for (site in sites){
+      id <- dbGetQuery(db, 
+                       "SELECT id FROM geo_loc_name_sites WHERE geo_loc_name_site = $1", 
                        list(site))$id
-      }
-    x[x==site] <- id
+      if (length(id)==0 & !is.na(site)){
+        message("Inserting ", site, " into geo_loc_name_sites")
+        id <- dbGetQuery(db,
+                         "INSERT INTO geo_loc_name_sites (geo_loc_name_site) VALUES ($1) RETURNING id",  
+                         list(site))$id
+        }
+      x[x==site] <- id
+    }
+    return(as.integer(x))
   }
-  return(as.integer(x))
 }
 #' Insert data into collection_information and associated tables
 #'
