@@ -12,6 +12,14 @@ amr_regexes <-function(){
       "_breakpoint$")
 }
 
+#' A little helper function in case ontology terms are not udpated
+#'
+#' @param x vector of ontology terms to update
+#' @export
+add_braces_to_ontology_terms <- function(x){
+  res <-gsub(x = x, pattern = ':\\s([A-Z]+[_:][0-9]+)', ' [\\1]')
+  return(res)
+}
 
 #' Get sample ids from the sample_collector_sample_ids
 #' 
