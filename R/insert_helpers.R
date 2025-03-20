@@ -54,17 +54,16 @@ set_grdi_nulls_to_NA <- function(x){
 insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = FALSE){
 
   df_long <- 
-    tibble(id = ids, term_list = vals) %>%
-    mutate(vals = str_extract_all(string = vals, "\\[([A-Za-z_]+)[:_]([A-Z0-9]+)\\]")) %>%
-    unnest(vals) %>% 
-    filter(!is.na(vals))
+    tibble(id = ids, terms = vals) %>%
+    separate_longer_delim(cols = terms, delim = stringr::regex("\\s{0,1}[|;,]\\s{0,1}")) %>%
+    filter(!is.na(terms))
   
   if (nrow(df_long)==0){ 
     message("No values for table ", table)
   } else { 
     if (is_ontology==TRUE){
       message("Inserting into ", table)
-      df_long$ont_ids <- convert_GRDI_ont_to_vmr_ids(db, df_long$vals)
+      df_long$ont_ids <- convert_GRDI_ont_to_vmr_ids(db, df_long$terms)
     }
     insert_sql <- glue::glue_sql("INSERT INTO", table, "VALUES ($1, $2)", .sep = " ")
     res <- dbExecute(db, insert_sql, list(df_long$id, df_long$ont_ids))
