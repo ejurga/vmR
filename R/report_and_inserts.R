@@ -12,17 +12,14 @@ repIns_project <- function(db, df){
   cat("Given Project Information:\n")
   print(pro)
 
-  x <- new_project(db, 
-                   sample_plan_id = pro$sample_plan_ID,  
-                   sample_plan_name = pro$sample_plan_name,  
-                   project_name = pro$sample_collection_project_name)
+  id <- new_project(db, 
+                    sample_plan_id = pro$sample_plan_ID, 
+                    sample_plan_name = pro$sample_plan_name, 
+                    project_name = pro$sample_collection_project_name)
   
-  print(paste("Inserted", x, "record into Projects"))
-
-  pro <- dbGetQuery(db, "SELECT id FROM projects WHERE project_name = $1",  
-                       list(pro$sample_collection_project_name))
+  print(paste("Inserted", length(id), "record into Projects"))
   
-  return(pro$id)
+  return(id)
 } 
 
 #' Report and insert collection info
