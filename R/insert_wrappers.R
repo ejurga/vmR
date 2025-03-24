@@ -9,13 +9,12 @@ report_and_insert_projects_samples_metadata <- function(db, df, commit = FALSE){
       
       pro_id <- repIns_project(db = db, df = df)
 
-      n_sam <- new_samples(db = db, 
-                           sample_names = df$sample_collector_sample_ID,
-                           project_id = rep(pro_id, nrow(df)))
-      print(paste("Inserted", n_sam, "records into samples table"))
+      sample_ids <- new_samples(db = db, 
+                                sample_names = df$sample_collector_sample_ID, 
+                                project_id = rep(pro_id, nrow(df)))
+      print(paste("Inserted", length(sample_ids), "records into samples table"))
 
-      df$sample_id <-
-        get_sample_ids(db, sample_names = df$sample_collector_sample_ID)  
+      df$sample_id <- sample_ids
 
       any_alts <- any(!is.na(df$alternative_sample_ID))
 

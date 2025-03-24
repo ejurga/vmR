@@ -14,16 +14,15 @@ new_project <- function(db, sample_plan_id, sample_plan_name, project_name = NA,
     "INSERT INTO projects 
     (sample_plan_id, sample_plan_name, project_name, description)
     VALUES 
-    ($1, $2, $3, $4)"
+    ($1, $2, $3, $4)
+    RETURNING id"
   )
   
-  x <- dbExecute(db, sql, list(sample_plan_id,  
-                               sample_plan_name, 
-                               project_name,  
-                               description))  
-  
-  return(x)
-  
+  x <- dbGetQuery(db, sql, list(sample_plan_id, 
+                                sample_plan_name, 
+                                project_name, 
+                                description))  
+  return(x$id)
 }
 
 #' Insert new samples into the samples table
@@ -39,12 +38,13 @@ new_samples <- function(db, sample_names, project_id){
     "INSERT INTO samples 
     (sample_collector_sample_id, project_id)
     VALUES 
-    ($1, $2)"
+    ($1, $2)
+    RETURNING id"
   )
   
-  x <- dbExecute(db, sql, list(sample_names, project_id))
+  x <- dbGetQuery(db, sql, list(sample_names, project_id))
   
-  return(x) 
+  return(x$id) 
   
 }
 
@@ -57,7 +57,7 @@ new_samples <- function(db, sample_names, project_id){
 #' @export
 insert_alternative_sample_ids <- function(db, vmr_sample_id, alt_id, note = NA){
   
-  if (is.na(note)) note = rep(NA, length(vmr_sample_id))
+  if (length(note)==1) note = rep(note, length(vmr_sample_id))
   
   sql <- SQL(
     "INSERT INTO alternative_sample_ids  
