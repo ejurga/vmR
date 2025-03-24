@@ -12,6 +12,26 @@ amr_regexes <-function(){
       "_breakpoint$")
 }
 
+#' Search for a term in a lookup table in the VMR
+#'
+#' @param db Connection to vmr
+#' @param lookup lookup table to search through
+#' @param x pattern
+#' @param form if 'term', just return the ontology string, if table, return as a datafram
+#' 
+#' @export
+grep_ont_term <- function(db, lookup, x, form = c("term", "table")){
+  form <- match.arg(form)
+  df <- lookup_table_terms(db, lookup) 
+  res <- df %>% filter(grepl(x=en_term, pattern = x, ignore.case = TRUE))
+  if (form=='term'){
+    terms <- paste0(res$en_term, ' [', res$ontology_id, ']')
+    return(terms)
+  } else {
+    return(res)
+  }
+}
+
 #' A little helper function in case ontology terms are not udpated
 #'
 #' @param x vector of ontology terms to update
