@@ -36,13 +36,13 @@ repIns_collection_info <- function(db, df, contact_id){
 
   col_info <- 
     df %>% 
-    select(sample_id, sample_collector_sample_ID, all_of(col_columns))
+    select(sample_id, sample_collector_sample_ID, any_of(col_columns))
   
   print_tallies_of_columns(col_info)
 
   col_info$contact_information <- contact_id
 
-  x <- 
+  ids <- 
     insert_collection_information(
       db = db, 
       sample_id = col_info$sample_id,
@@ -58,21 +58,16 @@ repIns_collection_info <- function(db, df, contact_id){
       collection_device = col_info$collection_device, 
       collection_method = col_info$collection_method)
   
-  print(paste("Inserted", x, "records into collection information table"))
-
-  collection_ids <- 
-    dbGetQuery(db, "SELECT id FROM collection_information WHERE sample_id = $1",  
-               list(col_info$sample_id)) %>%
-    pull(id)
+  print(paste("Inserted", length(ids), "records into collection information table"))
   
   insert_into_multi_choice_table(db, 
-                                 ids = collection_ids, 
+                                 ids = ids, 
                                  vals = df$purpose_of_sampling, 
                                  table = "sample_purposes", 
                                  is_ontology = TRUE)
 
   insert_into_multi_choice_table(db, 
-                                 ids = collection_ids, 
+                                 ids = ids, 
                                  vals = df$presampling_activity, 
                                  table = "sample_activity", 
                                  is_ontology = TRUE)
@@ -92,7 +87,7 @@ repIns_geo_data <- function(db, df){
                       site = geo$site_ids,
                       latitude = geo$geo_loc_latitude,
                       longitude = geo$geo_loc_longitude)
-  print(paste("Inserted", x, "records into geo table"))
+  print(paste("Inserted", length(x), "records into geo table"))
 }
 
 #' Report and insert food data
@@ -107,7 +102,7 @@ repIns_food_data <- function(db, df){
   
   print_tallies_of_columns(food)
 
-  x <- 
+  food_id <- 
     insert_food_data(
       db,  
       sample_id = food$sample_id, 
@@ -116,11 +111,7 @@ repIns_food_data <- function(db, df){
       food_packaging_date = food$food_packaging_date,
       food_quality_date = food$food_quality_date)
   
-  print(paste("Inserted", x, "records into food data table"))
-  
-  food$id <- 
-    dbGetQuery(db, "SELECT id FROM food_data WHERE sample_id = $1", 
-               list(food$sample_id)) %>% pull(id)
+  print(paste("Inserted", length(food_id), "records into food data table"))
   
   vals <-  list(food$food_product,    food$food_product_properties,  
                 food$food_packaging,  food$animal_source_of_food)
@@ -131,7 +122,7 @@ repIns_food_data <- function(db, df){
   mapply(FUN = insert_into_multi_choice_table, 
          vals = vals, 
          table = table_names,
-         MoreArgs = list(db = db, ids = food$id, is_ontology = TRUE))
+         MoreArgs = list(db = db, ids = food_id, is_ontology = TRUE))
 }
 
 #' Report and insert host data
@@ -162,7 +153,7 @@ repIns_host <- function(db, df){
       host_age_bin = host$host_age_bin,
       host_origin_geo_loc_name_country = host$host_origin_geo_loc_country)
   
-  print(paste("Inserted", x, "records into food data table"))
+  print(paste("Inserted", length, "records into food data table"))
     
 }
 
@@ -171,27 +162,27 @@ repIns_host <- function(db, df){
 #' @export
 repIns_env <- function(db, df){
   
+ env_cols <- c('animal_or_plant_population',
+               'available_data_types', 
+               'environmental_material',
+               'environmental_site',  
+               'weather_type',
+               'air_temperature',
+               'air_temperature_units',
+               'water_temperature', 
+               'water_temperature_units', 
+               'sediment_depth', 
+               'sediment_depth_units', 
+               'water_depth', 
+               'water_depth_units', 
+               'available_data_types_details')
   env <- 
     df %>% 
-    select(sample_id, 
-           animal_or_plant_population, 
-           available_data_types,
-           environmental_material,
-           environmental_site, 
-           weather_type, 
-           air_temperature,
-           air_temperature_units,
-           water_temperature,
-           water_temperature_units,
-           sediment_depth,
-           sediment_depth_units,
-           water_depth,
-           water_depth_units,
-           available_data_types_details)
+    select(sample_id, any_of(env_cols))
 
   print_tallies_of_columns(env)
 
-  x <- insert_env_data(db, 
+  ids <- insert_env_data(db, 
                        sample_id = env$sample_id,
                        air_temperature = env$air_temperature,
                        air_temperature_units = env$air_temperature_units,
@@ -202,15 +193,10 @@ repIns_env <- function(db, df){
                        water_depth = env$water_depth,
                        water_depth_units = env$water_depth_units,
                        available_data_type_details = env$available_data_types_details)
-  print(paste("Inserted", x, "into environmental data table"))
-  
-  env$id <- 
-    dbGetQuery(db, "SELECT id FROM environmental_data WHERE sample_id = $1", 
-               list(env$sample_id)) %>% 
-    pull(id)
+  print(paste("Inserted", length(ids), "into environmental data table"))
  
   insert_env_multi_choices(db,
-                           env_data_id = env$id, 
+                           env_data_id = ids, 
                            animal_or_plant_population = env$animal_or_plant_population, 
                            available_data_types = env$available_data_types, 
                            environmental_material = env$environmental_material, 
@@ -231,16 +217,13 @@ repIns_ana <- function(db, df){
 
   print_tallies_of_columns(ana)
 
-  x <- insert_anatomical_data(db,
+  ids <- insert_anatomical_data(db,
                               sample_id = ana$sample_id,
                               anatomical_region = ana$anatomical_region)
-  print(paste("Inserted", x, "into anatomy data"))
-
-  ana$ids <- dbGetQuery(db, "SELECT id FROM anatomical_data WHERE sample_id = $1", 
-                        list(ana$sample_id)) %>% pull(id)
+  print(paste("Inserted", length(ids), "into anatomy data"))
 
   insert_anatomical_multi_choices(db,
-                                  anatomy_ids = ana$ids, 
+                                  anatomy_ids = ids, 
                                   body_product = ana$body_product, 
                                   anatomical_material = ana$anatomical_material, 
                                   anatomical_part = ana$anatomical_part)

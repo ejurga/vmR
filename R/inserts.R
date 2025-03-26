@@ -167,8 +167,8 @@ insert_collection_information <-
                                                             "specimen_processing", 
                                                             "collection_device", 
                                                             "collection_method"))
-    x <- dbExecute(db, insert_sql, unname(params))
-    return(x)
+    x <- dbGetQuery(db, insert_sql, unname(params))
+    return(x$id)
 }
 
 
@@ -200,8 +200,8 @@ insert_geo_loc <- function(db, sample_id,
     sql_args$state_province_region <-
       convert_GRDI_ont_to_vmr_ids(db, sql_args$state_province_region, ont_table = "state_province_region")
     
-    x <- dbExecute(db, insert_sql, unname(sql_args))
-    return(x)
+    x <- dbGetQuery(db, insert_sql, unname(sql_args))
+    return(x$id)
 } 
 
 #' Insert data into the food data table 
@@ -224,8 +224,8 @@ insert_food_data <-
     sql_args$food_product_origin_country <- 
       convert_GRDI_ont_to_vmr_ids(db, sql_args$food_product_origin_country, ont_table = "countries")
     
-    x <- dbExecute(db, insert_sql, unname(sql_args))
-    return(x)
+    x <- dbGetQuery(db, insert_sql, unname(sql_args))
+    return(x$id)
   }
 
 #' Insert data into the environmental data table
@@ -251,8 +251,8 @@ insert_env_data <- function(db,
                                        sql_arguments = sql_args, 
                                        ontology_columns = names(sql_args)[grepl(x = names(sql_args), "units")])
     
-    x <- dbExecute(db, insert_sql, unname(params))
-    return(x)
+    x <- dbGetQuery(db, insert_sql, unname(params))
+    return(x$id)
 }
 
 #' Insert into the multi-choice tables for the environmental data 
@@ -311,8 +311,8 @@ insert_host_data <-
     params$host_origin_geo_loc_name_country <- 
       convert_GRDI_ont_to_vmr_ids(db, params$host_origin_geo_loc_name_country, ont_table = "countries")
                                           
-    x <- dbExecute(db, insert_sql, unname(params))
-    return(x)
+    x <- dbGetQuery(db, insert_sql, unname(params))
+    return(x$id)
   }
 
 #' Insert data into the anatomical data table 
@@ -330,8 +330,8 @@ insert_anatomical_data <-
     insert_sql <- make_insert_sql(table_name = "anatomical_data", field_names = names(sql_args))
     sql_args$anatomical_region <- convert_GRDI_ont_to_vmr_ids(db, sql_args$anatomical_region)
                                           
-    x <- dbExecute(db, insert_sql, unname(sql_args))
-    return(x)
+    x <- dbGetQuery(db, insert_sql, unname(sql_args))
+    return(x$id)
 }
 
 #' Insert into the multi-choice tables for the anatomical data
@@ -399,9 +399,10 @@ insert_isolate_data <-
     
     params$organism <- convert_GRDI_ont_to_vmr_ids(db, params$organism, "microbes")                 
 
-    res <- dbExecute(db, insert_sql, unname(params))
-    message("Inserted ", res, " records into isolates data table")
-}
+    res <- dbGetQuery(db, insert_sql, unname(params))
+    return(res$id)
+  }
+
 #' Convenience function to update alternative isolate IDS with notes
 #'
 #' @inheritParams get_sample_ids
