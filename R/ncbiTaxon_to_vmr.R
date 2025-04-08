@@ -1,0 +1,45 @@
+#' Get full NCBITaxon ontology and add bacterial genera and species to microbes table
+#' 
+#' @param db DBI connection to VMR
+#' @param file File to download the obo file to 
+#' @param commit Commit to the VMR?
+#' 
+#' @export
+append_ncbi_taxon_ontology_to_microbes <- function(db, file, commit = FALSE){
+
+  if (!file.exists(file)){
+    curl::curl_download(url = "https://purl.obolibrary.org/obo/ncbitaxon.obo", destfile = file, quiet = FALSE)
+  }
+  
+  message("Loading ontology into R (takes some time)")
+  ncbi <- ontologyIndex::get_OBO(file, extract_tags = "everything")
+  
+  # Get Bacillati, Fusobacteriati, Pseudomonadati 
+  bacteria <- ontologyIndex::get_descendants(ncbi, roots = c("NCBITaxon:1783272","NCBITaxon:3384189","NCBITaxon:3379134"), exclude_roots = TRUE)
+  
+  df <- tidyr::tibble(ontology_id = bacteria, scientific_name = ncbi$name[bacteria], property = ncbi$property_value[bacteria])
+  x <- ncbi$property_value[bacteria]
+  x[lengths(x)==0] <- NA
+  x <- gsub(x=x, "has_rank ", "")
+  df$has_rank <- x
+  
+  df_gs <-
+    df |> 
+    dplyr::filter(has_rank %in% c("NCBITaxon:genus", "NCBITaxon:species", "NCBITaxon:subgenus", "NCBITaxon:subspecies",  
+                           "NCBITaxon:strain", "NCBITaxon:serotype", "NCBITaxon:biotype", "NCBITaxon:varietas",   
+                           "NCBITaxon:serogroup")) |>
+    dplyr::select(ontology_id, scientific_name) 
+  
+  dbOrgs <- DBI::dbReadTable(db, "microbes")
+  
+  df_add <- df_gs[!df_gs$ontology_id %in% dbOrgs$ontology_id,]
+  df_add$curated = FALSE
+  
+  message("Found ", nrow(df_add), " taxon ontologies to add")
+  
+  if (commit) {
+    DBI::dbBegin(db)
+    DBI::dbAppendTable(db, name = "microbes", value = df_add)
+    DBI::dbCommit(db)
+  } else { message("commit set to FALSE, not appending") }
+}
