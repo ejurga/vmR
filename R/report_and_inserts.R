@@ -153,7 +153,7 @@ repIns_host <- function(db, df){
       host_age_bin = host$host_age_bin,
       host_origin_geo_loc_name_country = host$host_origin_geo_loc_country)
   
-  print(paste("Inserted", length, "records into food data table"))
+  print(paste("Inserted", length(x), "records into food data table"))
     
 }
 
