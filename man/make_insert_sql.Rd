@@ -6,6 +6,9 @@
 \usage{
 make_insert_sql(table_name, field_names)
 }
+\value{
+sql
+}
 \description{
 Makes a generate SQL insert statement from a table name and a list
 of parameters, which should correspond to that table's fields.
