@@ -5,7 +5,7 @@
 #' @param commit Commit to the VMR?
 #' 
 #' @export
-append_ncbi_taxon_ontology_to_microbes <- function(db, file, commit = FALSE){
+append_ncbi_taxon_ontology_to_microbes <- function(db, file, insert = FALSE){
 
   if (!file.exists(file)){
     curl::curl_download(url = "https://purl.obolibrary.org/obo/ncbitaxon.obo", destfile = file, quiet = FALSE)
@@ -37,9 +37,9 @@ append_ncbi_taxon_ontology_to_microbes <- function(db, file, commit = FALSE){
   
   message("Found ", nrow(df_add), " taxon ontologies to add")
   
-  if (commit) {
+  if (insert) {
     DBI::dbBegin(db)
     DBI::dbAppendTable(db, name = "microbes", value = df_add)
-    DBI::dbCommit(db)
+    message("Transaction started, call DBI::dCommit to finish")
   } else { message("commit set to FALSE, not appending") }
 }
