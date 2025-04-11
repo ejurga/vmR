@@ -4,12 +4,12 @@
 \alias{append_ncbi_taxon_ontology_to_microbes}
 \title{Get full NCBITaxon ontology and add bacterial genera and species to microbes table}
 \usage{
-append_ncbi_taxon_ontology_to_microbes(db, file, commit = FALSE)
+append_ncbi_taxon_ontology_to_microbes(db, ncbi, insert = FALSE)
 }
 \arguments{
 \item{db}{DBI connection to VMR}
 
-\item{file}{File to download the obo file to}
+\item{ncbi}{ontology loaded into R}
 
 \item{commit}{Commit to the VMR?}
 }
