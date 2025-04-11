@@ -440,12 +440,12 @@ new_extraction <-
     sql_args <- sql_args_to_uniform_list(environment())
 
     insert_sql <- make_insert_sql(table_name = "extractions", field_names = names(sql_args))
-    insert_sql <- glue::glue_sql(insert_sql, "RETURNING id", .sep = ' ')
     params <- sql_args_to_ontology_ids(db = db, 
                                        sql_arguments = sql_args, 
                                        ontology_columns = c("experimental_specimen_role_type",  
                                                             "sample_volume_measurement_unit",
                                                             "sample_storage_duration_unit", 
+                                                            "residual_sample_status",
                                                             "nucleic_acid_storage_duration_unit"))
     res <- dbGetQuery(db, insert_sql, unname(params))
     return(res$id)
@@ -454,8 +454,10 @@ new_extraction <-
 new_sequence <- 
   function(db, 
            extraction_id = NA,
+           library_id = NA,
            contact_information = NA,
            sequenced_by = NA, 
+           sequencing_date = NA,
            sequencing_project_name = NA,
            sequencing_platform = NA,
            sequencing_instrument = NA,
@@ -471,7 +473,6 @@ new_sequence <-
            r1_fastq_filename = NA,
            r2_fastq_filename = NA,
            fast5_filename = NA,
-           assembly_filename = NA,
            r1_irida_id = NA,
            r2_irida_id = NA){
     
@@ -484,8 +485,9 @@ new_sequence <-
                                                             "sequencing_instrument", 
                                                             "sequencing_assay_type", 
                                                             "genomic_target_enrichment_method"))
-    res <- dbExecute(db, insert_sql, unname(params))
-    message("Inserted ", res, " records into sequencing")
+    res <- dbGetQuery(db, insert_sql, unname(params))
+    message("Inserted ", length(res$id), " records into sequencing")
+    return(res$id)
   }
 
 insert_wgs_ext <- function(db, extraction_id, isolate_id){

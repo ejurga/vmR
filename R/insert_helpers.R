@@ -101,10 +101,10 @@ sql_args_to_uniform_list <- function(env){
 sql_args_to_ontology_ids <- function(db, ontology_columns, sql_arguments){
   
   x <- which(names(sql_arguments) %in% ontology_columns) 
-  sql_arguments[x] <-
-    lapply(FUN = convert_GRDI_ont_to_vmr_ids, 
-           X = sql_arguments[x],  
-           db = db) 
+  for (i in x){
+    print(paste("converting ontoloty col", names(sql_arguments)[i], "to vmr ids"))
+    sql_arguments[[i]] <- convert_GRDI_ont_to_vmr_ids(db = db, x = sql_arguments[[i]])
+  }
   return(sql_arguments)
 }
 
