@@ -412,6 +412,9 @@ insert_isolate_data <-
 #' 
 #' @export
 insert_alternative_isolate_ids <- function(db, iso_ids, alt_ids, notes){
+
+  if (length(notes)==1) notes <- rep(notes, length(iso_ids)) 
+
   dbExecute(
     db,
     "INSERT INTO alternative_isolate_ids (
@@ -419,7 +422,7 @@ insert_alternative_isolate_ids <- function(db, iso_ids, alt_ids, notes){
     ) VALUES (
       (SELECT id FROM isolates WHERE isolate_id = $1),
       $2, $3)
-    ON CONFLICT ON CONSTRAINT alternative_isolate_ids_alternative_isolate_id_key DO NOTHING",
+    ON CONFLICT ON CONSTRAINT alternative_isolate_ids_pkey DO NOTHING",
     list(iso_ids, alt_ids, notes))
 }
 
