@@ -426,6 +426,9 @@ insert_alternative_isolate_ids <- function(db, iso_ids, alt_ids, notes){
     list(iso_ids, alt_ids, notes))
 }
 
+#' Insert an extraction record
+#' 
+#' @export
 new_extraction <- 
   function(db, 
            experimental_protocol_field = NA,
@@ -454,6 +457,9 @@ new_extraction <-
     return(res$id)
   }
 
+#' Insert a sequence record
+#' 
+#' @export
 new_sequence <- 
   function(db, 
            extraction_id = NA,
@@ -493,6 +499,9 @@ new_sequence <-
     return(res$id)
   }
 
+#' Insert a WGS record, tying extraction to isolate
+#' 
+#' @export
 insert_wgs_ext <- function(db, extraction_id, isolate_id){
   insert_wgs_sql <- SQL("INSERT INTO wgs_extractions (isolate_id, extraction_id) VALUES ($1, $2)")
   res <- dbExecute(db, insert_wgs_sql, list(isolate_id, extraction_id))
