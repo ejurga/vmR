@@ -22,7 +22,8 @@ report_and_insert_projects_samples_metadata <- function(db, df, commit = FALSE){
       n_alt_sam <- 
         insert_alternative_sample_ids(db, 
                                       vmr_sample_id = alt_sam$sample_id,
-                                      alt_id = alt_sam$alternative_sample_ID)
+                                      alt_id = alt_sam$alternative_sample_ID, 
+                                      note = alt_sam$alternative_sample_id_note)
       print(paste("Inserted", n_alt_sam, "into alternative sample IDs table"))                                   
       contact <-
         df %>% 
