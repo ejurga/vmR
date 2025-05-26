@@ -330,3 +330,7 @@ check_for_existing_geo_loc_site <- function(db, x){
 
   return(fixed)
 }
+
+is_dataframe_all_empty <- function(df, cols){
+  all(sapply(X = cols, FUN = function(x) all(is.na(df[x]))))
+}
