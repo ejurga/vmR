@@ -82,7 +82,9 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
                                                      name="Not Provided [GENEPIO:0001668]",
                                                      email="Not Provided [GENEPIO:0001668]", 
                                                      note=NA){
-
+  
+  if (is.na(lab)) lab <- "Not Provided [GENEPIO:0001668]"
+  
   id <- dbGetQuery(db,
                    "SELECT id 
                     FROM contact_information 
@@ -106,6 +108,7 @@ return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:
   } else {
     return_id <- id$id
   }
+  return(return_id)
 }
 
 #' Replace site values with the geo_loc_site ID, or insert and return if not present
