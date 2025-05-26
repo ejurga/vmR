@@ -129,10 +129,12 @@ repIns_food_data <- function(db, df){
 #' 
 #' @export
 repIns_host <- function(db, df){
+ 
   
+  host_cols <- grep(x=colnames(df), "host", value = T)
   host <-
     df %>% 
-    select(sample_collector_sample_ID, sample_id, matches("host"))
+    select(sample_id, any_of(host_cols))
   
   host$host_organism_ids <- 
     host_organisms_to_ids(db, 
@@ -140,20 +142,23 @@ repIns_host <- function(db, df){
                           scientific_name = host$host_scientific_name)
   
   print_tallies_of_columns(host)
-  
-  x <- 
-    insert_host_data(
-      db,
-      sample_id = host$sample_id,
-      host_organism = host$host_organism_ids,
-      host_ecotype = host$host_ecotype,
-      host_breed = host$host_breed,
-      host_food_production_name = host$host_food_production_name,  
-      host_disease = host$host_disease,
-      host_age_bin = host$host_age_bin,
-      host_origin_geo_loc_name_country = host$host_origin_geo_loc_country)
-  
-  print(paste("Inserted", length(x), "records into food data table"))
+  # Check to see that not all the host columns are just NA!
+  if (!is_dataframe_all_empty(host, host_cols)){
+    x <- 
+      insert_host_data(
+        db,
+        sample_id = host$sample_id,
+        host_organism = host$host_organism_ids,
+        host_ecotype = host$host_ecotype,
+        host_breed = host$host_breed,
+        host_food_production_name = host$host_food_production_name,  
+        host_disease = host$host_disease,
+        host_age_bin = host$host_age_bin,
+        host_origin_geo_loc_name_country = host$host_origin_geo_loc_country)
+    print(paste("Inserted", length(x), "records into host data table"))
+  } else {
+    message("All host columns are empty, not inserting")
+  }
     
 }
 
@@ -182,49 +187,60 @@ repIns_env <- function(db, df){
 
   print_tallies_of_columns(env)
 
-  ids <- insert_env_data(db, 
-                       sample_id = env$sample_id,
-                       air_temperature = env$air_temperature,
-                       air_temperature_units = env$air_temperature_units,
-                       water_temperature = env$water_temperature,
-                       water_temperature_units = env$water_temperature_units,
-                       sediment_depth = env$sediment_depth,
-                       sediment_depth_units = env$sediment_depth_units,
-                       water_depth = env$water_depth,
-                       water_depth_units = env$water_depth_units,
-                       available_data_type_details = env$available_data_types_details)
-  print(paste("Inserted", length(ids), "into environmental data table"))
- 
-  insert_env_multi_choices(db,
-                           env_data_id = ids, 
-                           animal_or_plant_population = env$animal_or_plant_population, 
-                           available_data_types = env$available_data_types, 
-                           environmental_material = env$environmental_material, 
-                           environmental_site = env$environmental_site, 
-                           weather_type = env$weather_type)
+  if (!is_dataframe_all_empty(env, env_cols)){
+
+    ids <- insert_env_data(db, 
+                         sample_id = env$sample_id,
+                         air_temperature = env$air_temperature,
+                         air_temperature_units = env$air_temperature_units,
+                         water_temperature = env$water_temperature,
+                         water_temperature_units = env$water_temperature_units,
+                         sediment_depth = env$sediment_depth,
+                         sediment_depth_units = env$sediment_depth_units,
+                         water_depth = env$water_depth,
+                         water_depth_units = env$water_depth_units,
+                         available_data_type_details = env$available_data_types_details)
+    print(paste("Inserted", length(ids), "into environmental data table"))
+   
+    insert_env_multi_choices(db,
+                             env_data_id = ids, 
+                             animal_or_plant_population = env$animal_or_plant_population, 
+                             available_data_types = env$available_data_types, 
+                             environmental_material = env$environmental_material, 
+                             environmental_site = env$environmental_site, 
+                             weather_type = env$weather_type)
+  } else {
+    message("env columns all empty, not inserting")
+  }
 }
 
 #' Report and insert anatomical data 
 #' 
 #' @export
 repIns_ana <- function(db, df){
-  
+ 
+
+  ana_cols <-  c('anatomical_region', 'body_product', 'anatomical_material', 'anatomical_part')
+   
   ana <-
     df %>% 
-    select(sample_id, anatomical_region, body_product, anatomical_material, 
-           anatomical_part) %>% 
-    filter(!if_all(-sample_id, ~is.na(.x)))
+    select(sample_id, any_of(ana_cols))
 
   print_tallies_of_columns(ana)
 
-  ids <- insert_anatomical_data(db,
-                              sample_id = ana$sample_id,
-                              anatomical_region = ana$anatomical_region)
-  print(paste("Inserted", length(ids), "into anatomy data"))
-
-  insert_anatomical_multi_choices(db,
-                                  anatomy_ids = ids, 
-                                  body_product = ana$body_product, 
-                                  anatomical_material = ana$anatomical_material, 
-                                  anatomical_part = ana$anatomical_part)
+  if (!is_dataframe_all_empty(ana, ana_cols)){
+    
+    ids <- insert_anatomical_data(db,
+                                sample_id = ana$sample_id,
+                                anatomical_region = ana$anatomical_region)
+    print(paste("Inserted", length(ids), "into anatomy data"))
+  
+    insert_anatomical_multi_choices(db,
+                                    anatomy_ids = ids, 
+                                    body_product = ana$body_product, 
+                                    anatomical_material = ana$anatomical_material, 
+                                    anatomical_part = ana$anatomical_part)
+  } else {
+    message("anatomy columns all empty, not inserting")
+  }
 }
