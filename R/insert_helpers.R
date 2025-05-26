@@ -55,7 +55,7 @@ insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = F
 
   df_long <- 
     tibble(id = ids, terms = vals) %>%
-    separate_longer_delim(cols = terms, delim = stringr::regex("\\s{0,1}[|;,]\\s{0,1}")) %>%
+    separate_longer_delim(cols = terms, delim = stringr::regex("\\s{0,1}[|;]\\s{0,1}")) %>%
     filter(!is.na(terms))
   
   if (nrow(df_long)==0){ 
