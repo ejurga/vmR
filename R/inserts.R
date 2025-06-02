@@ -1,30 +1,3 @@
-#' Insert new project into the VMR database
-#' 
-#' @inheritParams get_sample_ids
-#' @param sample_plan_id VMR sample plan id
-#' @param sample_plan_name The sample plan name
-#' @param project_name The project name
-#' @param description Description of the project
-#' 
-#' @export
-new_project <- function(db, sample_plan_id, sample_plan_name, project_name = NA, 
-                        description = NA){
-  
-  sql <- DBI::SQL(
-    "INSERT INTO projects 
-    (sample_plan_id, sample_plan_name, project_name, description)
-    VALUES 
-    ($1, $2, $3, $4)
-    RETURNING id"
-  )
-  
-  x <- dbGetQuery(db, sql, list(sample_plan_id, 
-                                sample_plan_name, 
-                                project_name, 
-                                description))  
-  return(x$id)
-}
-
 #' Insert new samples into the samples table
 #' 
 #' @inheritParams get_sample_ids
@@ -35,17 +8,17 @@ new_project <- function(db, sample_plan_id, sample_plan_name, project_name = NA,
 new_samples <- function(db, sample_names, project_id){
   
   sql <- DBI::SQL(
-    "INSERT INTO samples 
+    "INSERT INTO samples
     (sample_collector_sample_id, project_id)
-    VALUES 
+    VALUES
     ($1, $2)
-    RETURNING id"
+    RETURNINGid"
   )
-  
+
   x <- dbGetQuery(db, sql, list(sample_names, project_id))
-  
-  return(x$id) 
-  
+
+  return(x$id)
+
 }
 
 #' Insert alternative sample ids

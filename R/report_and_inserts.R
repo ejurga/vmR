@@ -1,27 +1,3 @@
-
-#' Report and Insert project information
-#' 
-#' @export
-repIns_project <- function(db, df){
-
-  pro <-
-    df %>% 
-    select(sample_collection_project_name, sample_plan_name, sample_plan_ID) %>% 
-    distinct()
-
-  cat("Given Project Information:\n")
-  print(pro)
-
-  id <- new_project(db, 
-                    sample_plan_id = pro$sample_plan_ID, 
-                    sample_plan_name = pro$sample_plan_name, 
-                    project_name = pro$sample_collection_project_name)
-  
-  print(paste("Inserted", length(id), "record into Projects"))
-  
-  return(id)
-} 
-
 #' Report and insert collection info
 #' 
 #' @export
