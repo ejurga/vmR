@@ -51,39 +51,36 @@ insert_alternative_sample_ids <- function(db, vmr_sample_id, alt_id, note = NA){
 #' @param email Contact email, passed onto collection_information.contact_email
 #' 
 #' @export
-return_or_insert_contact_information <- function(db, lab="Not Provided [GENEPIO:0001668]",
-                                                     name="Not Provided [GENEPIO:0001668]",
-                                                     email="Not Provided [GENEPIO:0001668]", 
-                                                     note=NA){
-  
-  if (is.na(lab)) lab <- "Not Provided [GENEPIO:0001668]"
-  
-  id <- dbGetQuery(db,
-                   "SELECT id 
-                    FROM contact_information 
-                    WHERE laboratory_name = $1 
-                          AND
-                          contact_name = $2 
-                          AND
-                          contact_email = $3", 
-                   list(lab, name, email)) %>% as_tibble()
+get_contact_information_id <- function(db, lab, name, email){
 
-  if (nrow(id)==0){
-    message("Contact info not found, adding")
-    id <- dbGetQuery(db,
-               "INSERT INTO contact_information 
-               (laboratory_name, contact_name, contact_email, note)
-               VALUES 
-               ($1, $2, $3, $4) 
-               RETURNING id",
-               list(lab, name, email, note)) %>% as_tibble()
-    return_id <- id$id
-  } else {
-    return_id <- id$id
-  }
-  return(return_id)
+  lab[is.na(lab)]     <- "Not Provided [GENEPIO:0001668]"
+  email[is.na(email)] <- "Not Provided [GENEPIO:0001668]"
+   
+  x <- 
+    dbGetQuery(vmr, 
+      "WITH sel AS (
+        SELECT id, 
+               laboratory_name,
+               contact_name,
+               contact_email
+          FROM contact_information
+         WHERE     laboratory_name = $1
+               AND contact_name = $2
+               AND contact_email = $3
+      ),   ins AS ( 
+        INSERT INTO contact_information (laboratory_name, contact_name, contact_email)
+        SELECT $1, $2, $3
+        WHERE NOT EXISTS (select id FROM sel)
+        RETURNING id, laboratory_name, contact_name, contact_email
+      )
+      SELECT id FROM sel
+      UNION 
+      select id FROM ins",
+      list(lab, name, email))
+  return(x$id)
 }
-
+    
+   
 #' Insert data into collection_information and associated tables
 #'
 #' Inserts data into the table "collection_information", 
@@ -109,6 +106,8 @@ insert_collection_information <-
     
     sql_args <- sql_args_to_uniform_list(environment())
     insert_sql <- make_insert_sql(table_name = "collection_information", field_names = names(sql_args))
+    
+    
     params <- sql_args_to_ontology_ids(db = db,  
                                        sql_arguments = sql_args, 
                                        ontology_columns = c("sample_collected_by",  
