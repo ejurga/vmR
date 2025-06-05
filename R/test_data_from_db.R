@@ -15,5 +15,6 @@ make_test_data <- function(db, percent=1){
   test_df$original_sample_description <- "For testing inserts"
   test_df$sample_plan_id <- NA
   test_df$sample_plan_name <- NA
+  test_df$sample_collector_contact_name[is.na(test_df$sample_collector_contact_name)] <- "Mr. Test"
   return(test_df)
 }
