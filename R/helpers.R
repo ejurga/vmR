@@ -109,9 +109,10 @@ convert_GRDI_ont_to_vmr_ids <-
     factor(fac, levels = res_df$ontology_id, labels = res_df$id) |>
     as.character() |> 
     as.integer()
-  # Warn if there are NAs 
-  if (anyNA(res)){
-    message("Warning: NA's detected during ontology conversion: ", sum(is.na(res)))
+  # If, somehow, there are new NAs introduced during the conversion, warn about them.
+  compare_nas <- is.na(x)==is.na(res)
+  if ( !all(compare_nas) ) {
+    message("Warning: NA's detected during ontology conversion: ", sum(!compare_nas))
   }
   return(res)
 }
