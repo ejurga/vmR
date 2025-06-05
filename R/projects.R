@@ -1,15 +1,15 @@
 #' Insert new project into the VMR database
 #' 
 #' @inheritParams get_sample_ids
-#' @param sample_plan_id VMR sample plan id
-#' @param sample_plan_name The sample plan name
-#' @param project_name The project name
+#' @param df the dataframe with the project columns sample plan id
 #' @param description Description of the project
 #' 
 #' @export
-new_project <- function(db, sample_plan_id, sample_plan_name, project_name = NA,
-                        description = NA){
+new_project <- function(db, df, description = NA){
 
+  pro <- get_project_fields(df) %>% distinct()
+  pro$description <- NA
+  
   sql <- DBI::SQL(
     "INSERT INTO projects
     (sample_plan_id, sample_plan_name, project_name, description)
@@ -18,32 +18,32 @@ new_project <- function(db, sample_plan_id, sample_plan_name, project_name = NA,
     RETURNING id"
   )
 
-  x <- dbGetQuery(db, sql, list(sample_plan_id,
-                                sample_plan_name,
-                                project_name,
-                                description))
+  x <- dbGetQuery(db, sql, list(pro$sample_plan_id,
+                                pro$sample_plan_name,
+                                pro$sample_collection_project_name, 
+                                pro$description))
+  
+  message("inserted ", length(x$id), " into projects table")
   return(x$id)
 }
 
 #' Report and Insert project information
 #' 
 #' @export
-repIns_project <- function(db, df){
+report_projects <- function(df){
 
-  pro <-
-    df %>%
-    select(sample_collection_project_name, sample_plan_name, sample_plan_ID) %>%
-    distinct()
+  pro <- get_project_fields(df) %>% distinct()
 
   cat("Given Project Information:\n")
   print(pro)
-
-  id <- new_project(db, 
-                    sample_plan_id = pro$sample_plan_ID, 
-                    sample_plan_name = pro$sample_plan_name, 
-                    project_name = pro$sample_collection_project_name)
-  
-  print(paste("Inserted", length(id), "record into Projects"))
-
-  return(id)
+  cat("\n")
 }
+
+get_project_fields <- function(df){
+  project_fields <- c("sample_collection_project_name", "sample_plan_name", "sample_plan_id")
+  sel <- select(df, any_of(project_fields))
+  return(sel)
+}
+  
+
+
