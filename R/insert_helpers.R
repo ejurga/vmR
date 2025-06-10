@@ -1,33 +1,3 @@
-#' Take the common and scientific name columns and convert to a single ID 
-#' 
-#' Also checks to make sure that those two columns were the same ontology 
-#' term, otherwise, it is probably an error. 
-#' 
-#' @inheritParams get_sample_ids
-#' @param common_name host_common_name field 
-#' @param scientific_name host_scientific_name field
-#' 
-#' @export
-host_organisms_to_ids <- function(db, common_name, scientific_name){
- 
-  # Remove grdi NULLs and set to NA 
-  common_name <- set_grdi_nulls_to_NA(x = common_name)
-  scientific_name <- set_grdi_nulls_to_NA(x = scientific_name)
-  # Get only the ontology ids 
-  common_ids <- extract_ont_id(x = common_name)
-  science_ids <- extract_ont_id(x = scientific_name)
-  # Are they equal?
-  is.eq <- common_ids==science_ids
-  if (!all(is.eq, na.rm = TRUE)){
-    stop("common name and scientific name ontologies mismatched")
-  }
-  # Replace any NAs in one vector with the value from the other
-  ontology_terms <- ifelse(is.na(common_name), scientific_name, common_name)
-  # Get the Ids
-  host_org_ids <- convert_GRDI_ont_to_vmr_ids(db, ontology_terms, ont_table = "host_organisms")
-  return(host_org_ids)
-}
-
 #' Replace GRDI NULLs with NA 
 set_grdi_nulls_to_NA <- function(x){
   x[grepl(x=x, "^Not ")] <- NA
@@ -65,7 +35,7 @@ insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = F
       message("Inserting into ", table)
       df_long$ont_ids <- convert_GRDI_ont_to_vmr_ids(db, df_long$terms)
     }
-    insert_sql <- glue::glue_sql("INSERT INTO", table, "VALUES ($1, $2)", .sep = " ")
+    insert_sql <- glue::glue_sql("INSERT INTO", table, "(sample_id, term_id) VALUES ($1, $2)", .sep = " ")
     res <- dbExecute(db, insert_sql, list(df_long$id, df_long$ont_ids))
     message("Inserted ", res, " record into multi-choice table ", table)
   }
@@ -78,18 +48,23 @@ insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = F
 #' 
 #' @param ontology_columns A vector of the list names that are to be 
 #'   converted into VMR ids 
-#' @param sql_arguments A names list of vectors, which contain the vectors 
-#'   of ontology IDs to be converted into VMR ids.
-#' @return A named list of vector of same length as `sql_arguments`
+#' @param df The dataframe with the columns to convert
+#' @return dataframe
 #' 
-sql_args_to_ontology_ids <- function(db, ontology_columns, sql_arguments){
-  
-  x <- which(names(sql_arguments) %in% ontology_columns) 
-  for (i in x){
-    print(paste("converting ontoloty col", names(sql_arguments)[i], "to vmr ids"))
-    sql_arguments[[i]] <- convert_GRDI_ont_to_vmr_ids(db = db, x = sql_arguments[[i]])
+columns_to_ontology_ids <- function(db, df, ontology_columns, ont_table = 'ontology_terms'){
+ 
+  # make sure that the ontology colums are actually all in the df
+  in_df <- ontology_columns %in% colnames(df)
+  if ( !all(in_df) ) {
+    stop("These columns were called to be converted into VMR ids, but are missing: ",
+         paste0(ontology_columns[!in_df], collapse = ", "))
   }
-  return(sql_arguments)
+   
+  for (i in ontology_columns){
+    print(paste("converting ontology col", i, "to vmr ids"))
+    df[[i]] <- convert_GRDI_ont_to_vmr_ids(db = db, x = df[[i]], ont_table = ont_table)
+  }
+  return(df)
 }
 
 #' Repeat value of length 1 to max length of an argument list
