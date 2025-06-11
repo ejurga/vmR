@@ -67,21 +67,6 @@ columns_to_ontology_ids <- function(db, df, ontology_columns, ont_table = 'ontol
   return(df)
 }
 
-#' Repeat value of length 1 to max length of an argument list
-#' 
-#' If any in a list of arguments has length 1, then repeat this 
-#' value to the same length as the maxium length in the list. Required 
-#' because binding a list of parameters to an SQL query requires that 
-#' they all be the same length 
-#' 
-if_len_one_rep <- function(x){
-  for (i in which(lengths(x)<=1)){
-    if (is.null(x[[i]])) x[[i]] <- NA
-    x[[i]] <- rep(x[[i]], max(lengths(x))) 
-  }
-  return(x)
-}
-
 #' Create a generic SQL insert statement 
 #' 
 #' Makes a generate SQL insert statement from a table name and a list 
@@ -96,10 +81,3 @@ make_insert_sql <- function(table_name, field_names){
                    .sep = " ")
   return(insert_sql)
 }
-
-#' Return an SQL formatted list of args to pass to an insert statement
-#' 
-make_sql_params <- function(n){
-  sprintf('$%i', 1:n) |> glue::glue_sql_collapse(sep = ", ")
-}
-
