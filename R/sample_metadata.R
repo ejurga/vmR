@@ -40,6 +40,7 @@ get_contact_information_id <- function(db, lab, name, email){
 
   lab[is.na(lab)]     <- "Not Provided [GENEPIO:0001668]"
   email[is.na(email)] <- "Not Provided [GENEPIO:0001668]"
+  name[is.na(name)] <- "Not Provided [GENEPIO:0001668]"
    
   x <- 
     dbGetQuery(vmr, 
@@ -110,7 +111,7 @@ insert_sample_metadata <- function(db, df){
   
   # Get fields for sample table
   x <- dbListFields(db, "samples")
-  fields <- x[x!='id']
+  fields <- x[!(x %in% c('id', 'inserted_by', 'inserted_at', 'was_updated'))]
   samples <- df[,fields]
 
   # Ontology columns
@@ -152,11 +153,11 @@ insert_sample_metadata <- function(db, df){
   is_ont[is_ont=="environmental_data_material_constituents"] <- FALSE
   
   for ( i in seq(length(multi_choice_tables)) ){
-    insert_into_multi_choice_table(db, 
-                                   ids = df$sample_id, 
-                                   vals = df[[multi_choice_tables[i]]], 
+    insert_into_multi_choice_table(db,
+                                   ids = df$sample_id,
+                                   vals = df[[multi_choice_tables[i]]],
                                    table = db_tables[i], 
-                                   is_ontology = ontology = is_ont[i])
+                                   is_ontology = is_ont[i])
   }
 
   # Check for extra columns not inserted.
