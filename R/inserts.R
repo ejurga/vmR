@@ -2,42 +2,26 @@
 #' 
 #' @export
 #' 
-insert_isolate_data <- 
-  function(db, 
-           sample_id,  
-           isolate_id, 
-           organism = NA, 
-           strain = NA,
-           microbiological_method = NA, 
-           progeny_isolate_id = NA, 
-           isolated_by = NA, 
-           contact_information = NA, 
-           isolation_date = NA, 
-           isolate_received_date = NA, 
-           taxonomic_identification_process = NA, 
-           taxonomic_identification_process_details = NA, 
-           serovar = NA, 
-           serotyping_method = NA, 
-           phagetype = NA, 
-           irida_sample_id = NA, 
-           irida_project_id = NA, 
-           biosample_id = NA, 
-           bioproject_id = NA){
+insert_isolate_data <-  function(db, df){
   
-    sql_args <- sql_args_to_uniform_list(environment())
+  df$contact_information <- get_contact_information_id(db,  
+                                                       lab = df$isolated_by_lab_name, 
+                                                       email = df$isolated_by_contact_email, 
+                                                       name = df$isolated_by_contact_name)
+  # Get fields for sample table
+  x <- dbListFields(db, "isolates")
+  fields <- x[! (x %in% c('id', 'inserted_by', 'inserted_at', 'was_updated')) ]
+  isolates <- df[,fields]
 
-    insert_sql <- make_insert_sql(table_name = "isolates", field_names = names(sql_args))
-    
-    params <- sql_args_to_ontology_ids(db = db,  
-                                       sql_arguments = sql_args, 
-                                       ontology_columns = c("isolated_by",  
-                                                            "taxonomic_identification_process"))
-    
-    params$organism <- convert_GRDI_ont_to_vmr_ids(db, params$organism, "microbes")                 
-
-    res <- dbGetQuery(db, insert_sql, unname(params))
-    return(res$id)
-  }
+  # Ontology columns
+  ont_cols <- dbGetQuery(db, "SELECT column_name FROM ontology_columns WHERE table_name = 'isolates'")
+  isolates <- columns_to_ontology_ids(db, isolates, ont_cols$column_name)
+  isolates$organism <- convert_GRDI_ont_to_vmr_ids(db, isolates$organism, ont_table = "microbes")
+  
+  # Append to table
+  n <- dbAppendTable(db, name = "isolates", value = isolates)
+  message("Inserted ", n, " records into the isolate table")
+}
 
 #' Convenience function to update alternative isolate IDS with notes
 #'
