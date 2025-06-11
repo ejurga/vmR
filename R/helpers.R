@@ -48,13 +48,18 @@ add_braces_to_ontology_terms <- function(x){
 #' 
 #' @export
 get_sample_ids <- function(db, sample_names){
-  
-  x <-
-    dbGetQuery(
-      db, 
-      "SELECT id FROM samples WHERE sample_collector_sample_id = $1", 
-      list(sample_names))
-  
+  x <- dbGetQuery(db, "SELECT id FROM samples WHERE sample_collector_sample_id = $1", list(sample_names))
+  return(x$id)
+}
+
+#' Get isolate ids from the sample_collector_sample_ids
+#' 
+#' @param db [DBI] connection to VMR
+#' @param sample_names values to query
+#' 
+#' @export
+get_isolate_ids <- function(db, isolate_ids){
+  x <- dbGetQuery(db, "SELECT id FROM isolates WHERE isolate_id = $1", list(isolate_ids))
   return(x$id)
 }
 
