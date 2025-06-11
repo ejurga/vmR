@@ -149,17 +149,6 @@ seperate_column_into_longform <- function(df, col){
   return(df.long)
 }
 
-#' Insert df into one of the multi choice tables
-#'
-#' @export
-insert_into_multi_choice_table <- function(db, df, table){
-    df <- df %>% select(id, everything())
-    if (length(colnames(df))!=2) stop("df not 2 columns")
-    new_cols <- dbListFields(db, table)
-    colnames(df) <- new_cols
-    dbAppendTable(db, name = table, value = df)
-}
-
 #' Renaming a GRDI formatted dataframe to a VMR table
 #'
 #' @param db A DBI connection to the VMR
@@ -202,30 +191,6 @@ select_vmr_fields <- function(db, df, table){
   return(df.s)
 
 }
-
-#' Get a list of multi choice tables associated with the VMR table
-#'
-#' @export
-multi_choice_tables <- function(db, table){
-
-  fk <- dbReadTable(vmr, "foreign_keys") %>% as_tibble()
-
-  foreign_tabs <-
-    fk %>%
-    filter(foreign_table_name==vmr_tab) %>%
-    pull(table_name)
-
-  map <- get_template_map(vmr)
-
-  res <-
-    map %>%
-    filter(vmr_table %in% foreign_tabs) %>%
-    filter(is_multi_choice==TRUE) %>%
-    pull(grdi_field)
-
-  return(res)
-}
-
 
 #' Convert GRDI columns to VMR IDs.
 #'
@@ -299,44 +264,12 @@ set_vmr_isolate_id_from_alternates <- function(db, x){
   return(res)  
 }
 
-#' Checks for entry in geo_loc_site and adds a new one if it doesn't exist
-#'
-#' @param db connection to VRM
-#' @param x Vector of GRDI column geo_loc_name (site)
-#'
-#' @export
-check_for_existing_geo_loc_site <- function(db, x){
-
-  fac <- factor(x)
-
-  vals_in_db <- character(0)
-
-  while (!all(levels(fac) %in% vals_in_db)){
-
-    res <-
-      sendBindFetch(db,
-                    sql = "SELECT * FROM geo_loc_name_sites WHERE geo_loc_name_site = $1",
-                    params = list(levels(fac)))
-
-    vals_in_db <- res$geo_loc_name_site
-
-    vals_to_add <- levels(fac)[!levels(fac) %in% vals_in_db]
-    if (length(vals_to_add)>0){
-      message("Values not found, Adding to geo_loc_name_sites: ",
-              paste(vals_to_add, collapse = ", "))
-      insertBind(db,
-                 sql = "INSERT INTO geo_loc_name_sites (geo_loc_name_site) VALUES ($1)",
-                 params = list(vals_to_add))
-    }
-  }
-
-  fixed <-
-    factor(x, levels = res$geo_loc_name_site, labels = res$id) |>
-    as.character() |> as.integer()
-
-  return(fixed)
-}
-
 is_dataframe_all_empty <- function(df, cols){
   all(sapply(X = cols, FUN = function(x) all(is.na(df[x]))))
+}
+
+#' Replace GRDI NULLs with NA 
+set_grdi_nulls_to_NA <- function(x){
+  x[grepl(x=x, "^Not ")] <- NA
+  return(x)
 }
