@@ -8,7 +8,7 @@
 new_project <- function(db, df, description = NA){
 
   pro <- get_project_fields(df) %>% distinct()
-  pro$description <- NA
+  pro$description <- description
   
   sql <- DBI::SQL(
     "INSERT INTO projects
