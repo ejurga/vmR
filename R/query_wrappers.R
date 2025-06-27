@@ -118,5 +118,5 @@ set_vmr_isolate_id_from_alternates <- function(db, x){
   m <- match(x, vmrPos$isolate_collector_id)
   res <- vmrPos$isolate_id[m]
   if (anyNA(res)) message("NAs detected, total: ", sum(is.na(res)))
-  return(res)  
+  return(res)
 }
