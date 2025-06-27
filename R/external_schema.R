@@ -7,3 +7,19 @@ parse_latest_grdi_schema <- function(){
   schema <- yaml::yaml.load_file(file)
   return(schema)
 }
+
+#' Make a blank dataframe with the template column names
+#' 
+#' All will be NA
+#' 
+#' @param nrow number of rows for the dataframe
+#' @return empty dataframe of length nrow
+#' @export
+make_blank_sample_df <- function(nrow = 1){
+  schema <- vmR:::parse_latest_grdi_schema()
+  x <- sapply(FUN = function(x) slot_usage[[x]]$slot_group, X = names(slot_usage))
+  sample_cols <- names(x[x %in% c('Sample collection and processing', 'Environmental conditions and measurements', 'Host information', 'Risk assessment information')])
+  df <- as_tibble(matrix(ncol = length(sample_cols), nrow = nrow, dimnames = list(NULL, sample_cols)))
+  df <- df %>% mutate(across(everything(), ~as.character(.x)))
+  return(df)
+}
