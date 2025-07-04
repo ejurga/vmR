@@ -5,9 +5,10 @@
 insert_isolate_data <-  function(db, df){
   
   df$contact_information <- get_contact_information_id(db,  
-                                                       lab = df$isolated_by_lab_name, 
+                                                       lab = df$isolated_by_laboratory_name, 
                                                        email = df$isolated_by_contact_email, 
                                                        name = df$isolated_by_contact_name)
+  df <- rename(df, irida_sample_id = irida_isolate_id)
   # Get fields for sample table
   x <- dbListFields(db, "isolates")
   fields <- x[! (x %in% c('id', 'inserted_by', 'inserted_at', 'was_updated')) ]
@@ -50,29 +51,17 @@ insert_alternative_isolate_ids <- function(db, iso_ids, alt_ids, notes){
 #' 
 #' @export
 new_extraction <- 
-  function(db, 
-           experimental_protocol_field = NA,
-           experimental_specimen_role_type = NA,
-           nucleic_acid_extraction_method = NA,
-           nucleic_acid_extraction_kit = NA,
-           sample_volume_measurement_value = NA,
-           sample_volume_measurement_unit = NA,
-           residual_sample_status = NA,
-           sample_storage_duration_value = NA,
-           sample_storage_duration_unit = NA,
-           nucleic_acid_storage_duration_value = NA,
-           nucleic_acid_storage_duration_unit = NA){
+  function(db, df){
     
-    sql_args <- sql_args_to_uniform_list(environment())
+    # Get fields for sample table
+    x <- dbListFields(db, "extractions")
+    fields <- x[! (x %in% c('id', 'inserted_by', 'inserted_at', 'was_updated')) ]
+    ext <- df[,fields]
 
-    insert_sql <- make_insert_sql(table_name = "extractions", field_names = names(sql_args))
-    params <- sql_args_to_ontology_ids(db = db, 
-                                       sql_arguments = sql_args, 
-                                       ontology_columns = c("experimental_specimen_role_type",  
-                                                            "sample_volume_measurement_unit",
-                                                            "sample_storage_duration_unit", 
-                                                            "residual_sample_status",
-                                                            "nucleic_acid_storage_duration_unit"))
+    ont_cols <- dbGetQuery(db, "SELECT column_name FROM ontology_columns WHERE table_name = 'extractions'")
+    ext <- columns_to_ontology_ids(db, ext, ont_cols$column_name)
+    
+    insert_sql <- make_insert_sql(table_name = "extractions", field_names = fields)
     res <- dbGetQuery(db, insert_sql, unname(params))
     return(res$id)
   }
