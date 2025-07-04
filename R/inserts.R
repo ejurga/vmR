@@ -62,48 +62,31 @@ new_extraction <-
     ext <- columns_to_ontology_ids(db, ext, ont_cols$column_name)
     
     insert_sql <- make_insert_sql(table_name = "extractions", field_names = fields)
-    res <- dbGetQuery(db, insert_sql, unname(params))
+     
+    res <- dbGetQuery(db, insert_sql, unname(as.list(ext)))
+    message("inserted ", length(res$id), " into extractions table")
     return(res$id)
-  }
+}
 
 #' Insert a sequence record
 #' 
 #' @export
-new_sequence <- 
-  function(db, 
-           extraction_id = NA,
-           library_id = NA,
-           contact_information = NA,
-           sequenced_by = NA, 
-           sequencing_date = NA,
-           sequencing_project_name = NA,
-           sequencing_platform = NA,
-           sequencing_instrument = NA,
-           sequencing_assay_type = NA,
-           dna_fragment_length = NA,
-           genomic_target_enrichment_method = NA,
-           genomic_target_enrichment_method_details = NA,
-           amplicon_pcr_primer_scheme = NA,
-           amplicon_size = NA,
-           sequencing_flow_cell_version = NA,
-           library_preparation_kit = NA,
-           sequencing_protocol = NA,
-           r1_fastq_filename = NA,
-           r2_fastq_filename = NA,
-           fast5_filename = NA,
-           r1_irida_id = NA,
-           r2_irida_id = NA){
+new_sequence <- function(db, df){
     
-    sql_args <- sql_args_to_uniform_list(environment())
-    insert_sql <- make_insert_sql(table_name = "sequencing", field_names = names(sql_args))
-    params <- sql_args_to_ontology_ids(db = db, 
-                                       sql_arguments = sql_args, 
-                                       ontology_columns = c("sequenced_by", 
-                                                            "sequencing_platform", 
-                                                            "sequencing_instrument", 
-                                                            "sequencing_assay_type", 
-                                                            "genomic_target_enrichment_method"))
-    res <- dbGetQuery(db, insert_sql, unname(params))
+    df$contact_information <- get_contact_information_id(db,   
+                                                         lab = df$sequenced_by_laboratory_name,
+                                                         email = df$sequenced_by_contact_email, 
+                                                         name = df$sequenced_by_contact_name)
+    
+    x <- dbListFields(db, "sequencing")
+    fields <- x[! (x %in% c('id', 'inserted_by', 'inserted_at', 'was_updated', 'r1_irida_id', 'r2_irida_id')) ]
+    seq <- df[,fields]
+    # Ontologu cols
+    ont_cols <- dbGetQuery(db, "SELECT column_name FROM ontology_columns WHERE table_name = 'sequencing'")
+    seq <- columns_to_ontology_ids(db, seq, ont_cols$column_name)
+    
+    insert_sql <- make_insert_sql(table_name = "sequencing", field_names = fields)
+    res <- dbGetQuery(db, insert_sql, unname(as.list(seq)))
     message("Inserted ", length(res$id), " records into sequencing")
     return(res$id)
   }
@@ -111,8 +94,10 @@ new_sequence <-
 #' Insert a WGS record, tying extraction to isolate
 #' 
 #' @export
-insert_wgs_ext <- function(db, extraction_id, isolate_id){
+insert_wgs_seq<- function(db, df){
+  df$extraction_id <- new_extraction(vmr, df)
+  df$sequencing_id <- new_sequence(vmr, df)
   insert_wgs_sql <- SQL("INSERT INTO wgs_extractions (isolate_id, extraction_id) VALUES ($1, $2)")
-  res <- dbExecute(db, insert_wgs_sql, list(isolate_id, extraction_id))
+  res <- dbExecute(db, insert_wgs_sql, list(df$isolate_id, df$extraction_id))
   message("Inserted ", res, " records into WGS table")
 }
