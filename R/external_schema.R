@@ -15,11 +15,19 @@ parse_latest_grdi_schema <- function(){
 #' @param nrow number of rows for the dataframe
 #' @return empty dataframe of length nrow
 #' @export
-make_blank_sample_df <- function(nrow = 1){
+make_blank_df <- function(nrow = 1, type = c("samples", "isolates")) {
+  type <- match.arg(type)
   schema <- vmR:::parse_latest_grdi_schema()
+  slot_usage <- schema$classes$GRDI$slot_usage
   x <- sapply(FUN = function(x) slot_usage[[x]]$slot_group, X = names(slot_usage))
-  sample_cols <- names(x[x %in% c('Sample collection and processing', 'Environmental conditions and measurements', 'Host information', 'Risk assessment information')])
-  df <- as_tibble(matrix(ncol = length(sample_cols), nrow = nrow, dimnames = list(NULL, sample_cols)))
+  
+  if (type=="samples"){
+    cols <- names(x[x %in% c('Sample collection and processing', 'Environmental conditions and measurements', 'Host information', 'Risk assessment information')])
+  } else if (type=="isolates") {
+    cols <- names(x[x=="Strain and isolation information"])
+  } else stop("problem!")
+  
+  df <- as_tibble(matrix(ncol = length(cols), nrow = nrow, dimnames = list(NULL, cols)))
   df <- df %>% mutate(across(everything(), ~as.character(.x)))
   return(df)
 }
