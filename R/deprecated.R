@@ -1,23 +1,3 @@
-#' Create a generic SQL insert statement 
-#' 
-#' Makes a generate SQL insert statement from a table name and a list 
-#' of parameters, which should correspond to that table's fields.
-#' 
-#' @return sql
-#' 
-make_insert_sql <- function(table_name, field_names){
-  cols_sql <- glue::glue_sql_collapse(field_names, sep = ", ")
-  insert_sql <-
-    glue::glue_sql("INSERT INTO", table_name, "(", cols_sql, ") VALUES (", make_sql_params(length(field_names)), ") RETURNING id",
-                   .sep = " ")
-  return(insert_sql)
-}
-
-#' Return an SQL formatted list of args to pass to an insert statement
-#' 
-make_sql_params <- function(n){
-  sprintf('$%i', 1:n) |> glue::glue_sql_collapse(sep = ", ")
-}
 
 #' Get a list of multi choice tables associated with the VMR table
 #'
