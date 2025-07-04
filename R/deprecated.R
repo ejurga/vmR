@@ -13,6 +13,12 @@ make_insert_sql <- function(table_name, field_names){
   return(insert_sql)
 }
 
+#' Return an SQL formatted list of args to pass to an insert statement
+#' 
+make_sql_params <- function(n){
+  sprintf('$%i', 1:n) |> glue::glue_sql_collapse(sep = ", ")
+}
+
 #' Get a list of multi choice tables associated with the VMR table
 #'
 multi_choice_tables <- function(db, table){
