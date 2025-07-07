@@ -34,7 +34,7 @@ associate_irida_seqs_with_vmr_isolates <- function(db){
       message("multiple sequences found in irida, assign manually for: ", unique(irida_seqs$sample_id[in_irida]))
     } else {
        x <- irida_seqs[in_irida,]
-       df$r1_fastq_filename[in_vmr] <- x$fileName_forward
+       df$r1_fastq_filename[in_vmr] <- x$file_forward
        df$r2_fastq_filename[in_vmr] <- x$file_reverse
        df$r1_irida_id[in_vmr] <- x$identifier_forward
        df$r2_irida_id[in_vmr] <- x$identifier_reverse
