@@ -76,15 +76,20 @@ get_contact_information_id <- function(db, lab, name, email){
 insert_alternative_sample_ids <- function(db, vmr_sample_id, alt_id, note = NA){
   
   if (length(note)==1) note = rep(note, length(vmr_sample_id))
-  
-  sql <- SQL(
-    "INSERT INTO alternative_sample_ids  
-    (sample_id, alternative_sample_id, note)
-    VALUES 
-    ($1, $2, $3)"
-  )
-  
-  x <- dbExecute(db, sql, list(vmr_sample_id, alt_id, note))
+  not_na <- !is.na(alt_id)
+  if  (!any(not_na)) {
+    message("No alt ids to insert")
+    return(NA)
+  } else {
+    sql <- SQL(
+      "INSERT INTO alternative_sample_ids  
+      (sample_id, alternative_sample_id, note)
+      VALUES 
+      ($1, $2, $3)
+      ON CONFLICT ON CONSTRAINT alternative_sample_ids_pkey DO NOTHING"
+    )
+    x <- dbExecute(db, sql, list(vmr_sample_id[not_na], alt_id[not_na], note))
+  }
   return(x) 
 }
 
@@ -129,7 +134,7 @@ insert_sample_metadata <- function(db, df){
   # get sample ids
   df$sample_id <- get_sample_ids(db, samples$sample_collector_sample_id)
   # alt ids
-  insert_alternative_sample_ids(db = db, vmr_sample_id = df$sample_id, alt_id = df$alternative_sample_id)
+  insert_alternative_sample_ids(db = db, vmr_sample_id = df$sample_id[has_alt_ids], alt_id = df$alternative_sample_id[has_alt_ids])
   df <- select(df, -alternative_sample_id)
 
   # Finally, multi choice tables
