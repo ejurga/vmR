@@ -134,7 +134,7 @@ insert_sample_metadata <- function(db, df){
   # get sample ids
   df$sample_id <- get_sample_ids(db, samples$sample_collector_sample_id)
   # alt ids
-  insert_alternative_sample_ids(db = db, vmr_sample_id = df$sample_id[has_alt_ids], alt_id = df$alternative_sample_id[has_alt_ids])
+  insert_alternative_sample_ids(db = db, vmr_sample_id = df$sample_id, alt_id = df$alternative_sample_id)
   df <- select(df, -alternative_sample_id)
 
   # Finally, multi choice tables
