@@ -5,7 +5,8 @@ clean_names <- function(x){
   new_names <- gsub(pattern = "[ ()/]", replacement = "_", x = x)
   new_names <- gsub(pattern = "__", replacement = "_", x = new_names)
   new_names <- gsub(pattern = "_$", replacement = "", x = new_names)
-  return(new_names) 
+  new_names <- tolower(new_names)
+  return(new_names)
 }
 
 #' Open a sheet from the Excel Template and return a neat dataframe
