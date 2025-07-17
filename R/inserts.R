@@ -10,8 +10,7 @@ insert_isolate_data <-  function(db, df){
                                                        name = df$isolated_by_contact_name)
   df <- rename(df, irida_sample_id = irida_isolate_id)
   # Get fields for sample table
-  x <- dbListFields(db, "isolates")
-  fields <- x[! (x %in% c('id', 'inserted_by', 'inserted_at', 'was_updated')) ]
+  fields <- select_fields(db, "isolates", colnames(df))
   isolates <- df[,fields]
 
   # Ontology columns
@@ -54,8 +53,7 @@ new_extraction <-
   function(db, df){
     
     # Get fields for sample table
-    x <- dbListFields(db, "extractions")
-    fields <- x[! (x %in% c('id', 'inserted_by', 'inserted_at', 'was_updated')) ]
+    fields <- select_fields(db, "extractions", colnames(df))
     ext <- df[,fields]
 
     ont_cols <- dbGetQuery(db, "SELECT column_name FROM ontology_columns WHERE table_name = 'extractions'")
@@ -77,10 +75,10 @@ new_sequence <- function(db, df){
                                                          lab = df$sequenced_by_laboratory_name,
                                                          email = df$sequenced_by_contact_email, 
                                                          name = df$sequenced_by_contact_name)
-    
-    x <- dbListFields(db, "sequencing")
-    fields <- x[! (x %in% c('id', 'inserted_by', 'inserted_at', 'was_updated', 'r1_irida_id', 'r2_irida_id')) ]
+   
+    fields <- select_fields(db, "sequencing", colnames(df))
     seq <- df[,fields]
+    
     # Ontologu cols
     ont_cols <- dbGetQuery(db, "SELECT column_name FROM ontology_columns WHERE table_name = 'sequencing'")
     seq <- columns_to_ontology_ids(db, seq, ont_cols$column_name)
@@ -89,7 +87,7 @@ new_sequence <- function(db, df){
     res <- dbGetQuery(db, insert_sql, unname(as.list(seq)))
     message("Inserted ", length(res$id), " records into sequencing")
     return(res$id)
-  }
+}
 
 #' Insert a WGS record, tying extraction to isolate
 #' 

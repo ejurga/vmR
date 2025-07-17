@@ -113,10 +113,8 @@ insert_sample_metadata <- function(db, df){
   # Deal with host organism
   df$host_organism <- host_organisms_to_ids(db = db, common_name = df$host_common_name, df$host_scientific_name)
   df <- select(df, -host_common_name, -host_scientific_name)
-  
-  # Get fields for sample table
-  x <- dbListFields(db, "samples")
-  fields <- x[!(x %in% c('id', 'inserted_by', 'inserted_at', 'was_updated'))]
+ 
+  fields <- select_fields(db, "samples", colnames(df))
   samples <- df[,fields]
 
   # Ontology columns
