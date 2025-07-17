@@ -3,7 +3,6 @@
 export(add_braces_to_ontology_terms)
 export(amatch_term)
 export(amr_regexes)
-export(associate_irida_seqs_with_vmr_isolates)
 export(convert_GRDI_ont_to_vmr_ids)
 export(extract_ont_id)
 export(get_contact_information_id)

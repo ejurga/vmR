@@ -4,12 +4,10 @@
 \alias{update_sequences_with_irida}
 \title{Update VMR with irida sequence information}
 \usage{
-update_sequences_with_irida(db, df)
+update_sequences_with_irida(db, seq_id, f_file, r_file, f_id, r_id)
 }
 \arguments{
 \item{db}{\link{DBI} connection to VMR}
-
-\item{df}{dataframe returned from \link{associate_irida_seqs_with_vmr_isolates}}
 }
 \description{
 Update VMR with irida sequence information
