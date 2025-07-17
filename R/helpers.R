@@ -1,3 +1,29 @@
+#' Convert the vectors of ontology terms into their corresponding VMR ids
+#' 
+#' Given a list of vectors that are to be input into the VMR, convert the 
+#' desired columns containing ontology terms into their respective VMR IDs
+#' 
+#' @param ontology_columns A vector of the list names that are to be 
+#'   converted into VMR ids 
+#' @param df The dataframe with the columns to convert
+#' @return dataframe
+#' 
+columns_to_ontology_ids <- function(db, df, ontology_columns, ont_table = 'ontology_terms'){
+ 
+  # make sure that the ontology colums are actually all in the df
+  in_df <- ontology_columns %in% colnames(df)
+  if ( !all(in_df) ) {
+    warning("These columns were called to be converted into VMR ids, but are missing: ",
+         paste0(ontology_columns[!in_df], collapse = ", "))
+  }
+   
+  for (i in ontology_columns[in_df]){
+    print(paste("converting ontology col", i, "to vmr ids"))
+    df[[i]] <- convert_GRDI_ont_to_vmr_ids(db = db, x = df[[i]], ont_table = ont_table)
+  }
+  return(df)
+}
+
 #' Insert values into one of the common-format multi-choice metadata tables 
 #' 
 #' Currently, the GRDI schema allows some fields to be populated with multiple
@@ -17,21 +43,26 @@
 #' @export
 insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = FALSE){
 
-  df_long <- 
-    tibble(id = ids, terms = vals) %>%
-    separate_longer_delim(cols = terms, delim = stringr::regex("\\s{0,1}[|;]\\s{0,1}")) %>%
-    filter(!is.na(terms))
+  if (is.null(vals)){
+    message("There are no defined values for inputs into table ", table, " skipping")
+  } else {
+    
+    df_long <- 
+      tibble(id = ids, terms = vals) %>%
+      separate_longer_delim(cols = terms, delim = stringr::regex("\\s{0,1}[|;]\\s{0,1}")) %>%
+      filter(!is.na(terms))
   
-  if (nrow(df_long)==0){ 
-    message("No values for table ", table)
-  } else { 
-    if (is_ontology==TRUE){
-      message("Inserting into ", table)
-      df_long$ont_ids <- convert_GRDI_ont_to_vmr_ids(db, df_long$terms)
+    if (nrow(df_long)==0){ 
+      message("No values for table ", table)
+    } else { 
+      if (is_ontology==TRUE){
+        message("Inserting into ", table)
+        df_long$ont_ids <- convert_GRDI_ont_to_vmr_ids(db, df_long$terms)
+      }
+      insert_sql <- glue::glue_sql("INSERT INTO", table, "(sample_id, term_id) VALUES ($1, $2)", .sep = " ")
+      res <- dbExecute(db, insert_sql, list(df_long$id, df_long$ont_ids))
+      message("Inserted ", res, " record into multi-choice table ", table)
     }
-    insert_sql <- glue::glue_sql("INSERT INTO", table, "(sample_id, term_id) VALUES ($1, $2)", .sep = " ")
-    res <- dbExecute(db, insert_sql, list(df_long$id, df_long$ont_ids))
-    message("Inserted ", res, " record into multi-choice table ", table)
   }
 }
 
@@ -112,3 +143,22 @@ make_insert_sql <- function(table_name, field_names){
 make_sql_params <- function(n){
   sprintf('$%i', 1:n) |> glue::glue_sql_collapse(sep = ", ")
 }
+
+#' From a DF, select only those cols relevant to the table insert.
+#' 
+#' Also: warn if there are columns in the database that are missing in the 
+#' input dataframe, but do not throw an error.
+#' 
+select_fields <- function(db, db_table, df_cols){ 
+  # Get fields for database table
+  dbcols <- dbListFields(db, db_table)
+  # Remove DB specific cols.
+  dbcols <- dbcols[!(dbcols %in% c('id', 'inserted_by', 'inserted_at', 'was_updated'))]
+  # Warn if fields not present
+  in_df <- dbcols %in% df_cols
+  if (any(!in_df)){
+    message("warning: These fields are missing from input df: ", paste0(dbcols[!in_df], collapse = ', '))
+  }
+  dbcols <- dbcols[in_df]
+  return(dbcols)
+  }

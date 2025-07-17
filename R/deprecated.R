@@ -21,31 +21,6 @@ multi_choice_tables <- function(db, table){
   return(res)
 }
 
-#' Convert the vectors of ontology terms into their corresponding VMR ids
-#' 
-#' Given a list of vectors that are to be input into the VMR, convert the 
-#' desired columns containing ontology terms into their respective VMR IDs
-#' 
-#' @param ontology_columns A vector of the list names that are to be 
-#'   converted into VMR ids 
-#' @param df The dataframe with the columns to convert
-#' @return dataframe
-#' 
-columns_to_ontology_ids <- function(db, df, ontology_columns, ont_table = 'ontology_terms'){
- 
-  # make sure that the ontology colums are actually all in the df
-  in_df <- ontology_columns %in% colnames(df)
-  if ( !all(in_df) ) {
-    stop("These columns were called to be converted into VMR ids, but are missing: ",
-         paste0(ontology_columns[!in_df], collapse = ", "))
-  }
-   
-  for (i in ontology_columns){
-    print(paste("converting ontology col", i, "to vmr ids"))
-    df[[i]] <- convert_GRDI_ont_to_vmr_ids(db = db, x = df[[i]], ont_table = ont_table)
-  }
-  return(df)
-}
 
 #' Renaming a GRDI formatted dataframe to a VMR table
 #'
