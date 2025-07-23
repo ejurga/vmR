@@ -28,7 +28,7 @@ isolates_with_no_irida_sequencing_ids <- function(db){
 #' @param samples a vector of irida sample ID.
 #' 
 #' @return dataframe of paired-end reads assocaited with each sample
-#' 
+#' @export
 query_pairs_from_irida <- function(samples){
 
   x <- duplicated(samples)
