@@ -22,11 +22,17 @@ open_sheet <- function(file, sheet_name){
                         colNames = TRUE, 
                         startRow = 2, 
                         sep.names = '_', 
-                        detectDates = TRUE) %>% as_tibble()
+                        detectDates = TRUE, na.strings = "") %>% as_tibble()
+  # If all NA, set to character
   df <- df %>% mutate(across(where(~ all(is.na(.x))), ~as.character(.x)))
+  # Set blank strings to NA, where openxlsx fails to do so: 
+  df[df==""] <- NA
+  # Clean the names according the them rules
   names(df) <- clean_names(names(df))
   return(df)
 }
+
+df$specimen_processing==""
 
 #' Quickly get all unique values in a vector and print them out in a string 
 #' 
