@@ -32,8 +32,6 @@ open_sheet <- function(file, sheet_name){
   return(df)
 }
 
-df$specimen_processing==""
-
 #' Quickly get all unique values in a vector and print them out in a string 
 #' 
 #' This is for the markdown insertion report, for inline tallies of what is 
