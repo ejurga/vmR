@@ -77,7 +77,7 @@ amr_regexes <-function(){
       "_laboratory_typing_[a-z_]+$",
       "_vendor_name$",
       "_testing_standard[a-z_]{0,}$",
-      "_breakpoint$")
+      "_(resistant|intermediate|susceptible)_breakpoint$")
 }
 
 #' A little helper function in case ontology terms are not udpated
