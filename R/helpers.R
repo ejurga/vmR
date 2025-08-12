@@ -66,19 +66,6 @@ insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = F
   }
 }
 
-#' amr_regexes
-#'
-#' Rerturn a vector to filter out AMR columns
-#'
-#' @export
-amr_regexes <-function(){
-    c("_resistance_phenotype$",
-      "_measurement(_units|_sign){0,1}$",
-      "_laboratory_typing_[a-z_]+$",
-      "_vendor_name$",
-      "_testing_standard[a-z_]{0,}$",
-      "_(resistant|intermediate|susceptible)_breakpoint$")
-}
 
 #' A little helper function in case ontology terms are not udpated
 #'
@@ -105,7 +92,7 @@ amatch_term <- function(db, x, lookup_table){
   df <- lookup_table_terms(vmr, lookup_table)
   res <- stringdist::afind(pattern=x, x=df$en_term)
   res_df <- df[max.col(t(-res$distance)),]
-  for (i in seq(length(x))) message(x[i], " --> ", res_df$en_term[i])
+  res_df$query <- x
   return(res_df)
 }
 
