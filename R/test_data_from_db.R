@@ -15,7 +15,7 @@ make_new_ids <- function(n, prepend, width=4){
 make_test_data <- function(db, percent=1){
   df <- get_random_samples(db, percent=percent)
   test_df <- dplyr::select(df, -sample_id, -project_description)
-  test_df$alternative_sample_ids <- test_df$sample_collector_sample_id
+  test_df$alternative_sample_id <- test_df$sample_collector_sample_id
   test_df$sample_collector_sample_id <- make_new_ids(n = seq(1, nrow(test_df)), prepend = "test_sample-")
   test_df$sample_collection_project_name <- "Test data"
   test_df$original_sample_description <- "For testing inserts"
