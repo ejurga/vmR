@@ -9,6 +9,29 @@ clean_names <- function(x){
   return(new_names)
 }
 
+read_template_from_excel <- function(file, fields = c("Samples", "Isolates", "Sequences")){
+  fields <- match.arg(fields) 
+  if (fields=="Samples"){
+    dfs = list()
+    cols_remove = c("alternative_sample_id", "isolate_id", "alternative_isolate_id")
+    dfs$sam  <- open_sheet(file = file, sheet_name = "Sample Collection & Processing")
+    dfs$host <- open_sheet(file, sheet_name = "Host Information")         %>% select(-any_of(cols_remove)) %>% distinct()
+    dfs$env  <- open_sheet(file, sheet_name = "Environmental conditions") %>% select(-any_of(cols_remove)) %>% distinct()
+    tryCatch({
+      df <- dfs$sam %>% 
+        left_join(dfs$host, by = "sample_collector_sample_id", relationship = "one-to-many")  %>% 
+        left_join(dfs$env, by = "sample_collector_sample_id", relationship = "one-to-many")
+      return(df)}, 
+    finally = {return(dfs)})
+    } else if (fields=="Isolates"){
+      df  <- open_sheet(file = file, sheet_name = "Strain and Isolate Information")
+      return(df)
+    } else {
+      df  <- open_sheet(file = file, sheet_name = "Sequence Information")
+      return(df)
+    }
+}
+
 #' Open a sheet from the Excel Template and return a neat dataframe
 #' 
 #' @param file Path to the excel template file with data 
