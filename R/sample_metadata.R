@@ -88,7 +88,7 @@ insert_alternative_sample_ids <- function(db, vmr_sample_id, alt_id, note = NA){
       ($1, $2, $3)
       ON CONFLICT ON CONSTRAINT alternative_sample_ids_pkey DO NOTHING"
     )
-    x <- dbExecute(db, sql, list(vmr_sample_id[not_na], alt_id[not_na], note))
+    x <- dbExecute(db, sql, list(vmr_sample_id[not_na], alt_id[not_na], note[not_na]))
   }
   return(x) 
 }
