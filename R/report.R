@@ -9,6 +9,12 @@ clean_names <- function(x){
   return(new_names)
 }
 
+#' Read fields from a GRDI excel template, combining sheets if necessary
+#'
+#' @param file excel file to read
+#' @param fields One of "Samples", "Isolates", or "Sequences"
+#'
+#' @export
 read_template_from_excel <- function(file, fields = c("Samples", "Isolates", "Sequences")){
   fields <- match.arg(fields) 
   if (fields=="Samples"){
@@ -22,7 +28,10 @@ read_template_from_excel <- function(file, fields = c("Samples", "Isolates", "Se
         left_join(dfs$host, by = "sample_collector_sample_id", relationship = "one-to-many")  %>% 
         left_join(dfs$env, by = "sample_collector_sample_id", relationship = "one-to-many")
       return(df)}, 
-    finally = {return(dfs)})
+    error = function(cond){
+      message("Error encountered, returning dfs seperately")
+      message(conditionMessage(cond))
+      return(dfs)})
     } else if (fields=="Isolates"){
       df  <- open_sheet(file = file, sheet_name = "Strain and Isolate Information")
       return(df)
