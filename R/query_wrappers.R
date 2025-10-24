@@ -89,8 +89,10 @@ grep_ont_term <- function(db, lookup, x, form = c("term", "table")){
 #' 
 #' @export
 get_sample_ids <- function(db, sample_names){
-  x <- dbGetQuery(db, "SELECT id FROM samples WHERE sample_collector_sample_id = $1", list(sample_names))
-  return(x$id)
+  x <- dbGetQuery(db, "SELECT $1 AS query, id FROM samples WHERE sample_collector_sample_id = $1", list(sample_names))
+  ids <- x$id[match(sample_names, x$query)]
+  if (any(is.na((ids)))) warning("Some sample IDs NOT FOUND in VMR")
+  return(ids)
 }
 
 #' Get isolate ids from the sample_collector_sample_ids
@@ -100,8 +102,10 @@ get_sample_ids <- function(db, sample_names){
 #' 
 #' @export
 get_isolate_ids <- function(db, isolate_ids){
-  x <- dbGetQuery(db, "SELECT id FROM isolates WHERE isolate_id = $1", list(isolate_ids))
-  return(x$id)
+  x <- dbGetQuery(db, "SELECT $1 AS query, id FROM isolates WHERE isolate id = $1", list(isolate_ids))
+  ids <- x$id[match(isolate_ids, x$query)]
+  if (any(is.na((ids)))) warning("Some isolates IDs NOT FOUND in VMR")
+  return(ids)
 }
 
 #' Set user isolate IDs to VMR ids from all possible alternative ids
