@@ -102,7 +102,7 @@ get_sample_ids <- function(db, sample_names){
 #' 
 #' @export
 get_isolate_ids <- function(db, isolate_ids){
-  x <- dbGetQuery(db, "SELECT $1 AS query, id FROM isolates WHERE isolate id = $1", list(isolate_ids))
+  x <- dbGetQuery(db, "SELECT $1 AS query, id FROM isolates WHERE isolate_id = $1", list(isolate_ids))
   ids <- x$id[match(isolate_ids, x$query)]
   if (any(is.na((ids)))) warning("Some isolates IDs NOT FOUND in VMR")
   return(ids)

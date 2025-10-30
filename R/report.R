@@ -36,10 +36,21 @@ read_template_from_excel <- function(file, fields = c("Samples", "Isolates", "Se
       df  <- open_sheet(file = file, sheet_name = "Strain and Isolate Information")
       return(df)
     } else {
-      df  <- open_sheet(file = file, sheet_name = "Sequence Information")
-      return(df)
+      # Get main sheet
+      df   <- open_sheet(file = file, sheet_name = "Sequence Information")
+      # Grab the relevant sequence information from the samples sheet.
+      sam  <-
+        open_sheet(file = file, sheet_name = "Sample Collection & Processing") %>%
+        select(sample_collector_sample_id,
+               nucleic_acid_extraction_method,
+               nucleic_acid_extraction_kit,
+               nucleic_acid_storage_duration_value,
+               nucleic_acid_storage_duration_unit)
+      seq <- df %>% left_join(sam, by = 'sample_collector_sample_id', relationship = "many-to-one")
+      return(seq)
     }
 }
+
 
 #' Open a sheet from the Excel Template and return a neat dataframe
 #' 
