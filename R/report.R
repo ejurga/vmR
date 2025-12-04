@@ -24,8 +24,9 @@ read_template_from_excel <- function(file, fields = c("Samples", "Isolates", "Se
     dfs$host <- open_sheet(file, sheet_name = "Host Information")         %>% select(-any_of(cols_remove)) %>% distinct()
     dfs$env  <- open_sheet(file, sheet_name = "Environmental conditions") %>% select(-any_of(cols_remove)) %>% distinct()
     tryCatch({
-      df <- dfs$sam %>% 
-        left_join(dfs$host, by = "sample_collector_sample_id", relationship = "one-to-many")  %>% 
+      df <- 
+        dfs$sam %>%
+        left_join(dfs$sam, dfs$host, by = "sample_collector_sample_id", relationship = "one-to-many") %>%
         left_join(dfs$env, by = "sample_collector_sample_id", relationship = "one-to-many")
       return(df)}, 
     error = function(cond){
@@ -72,7 +73,11 @@ open_sheet <- function(file, sheet_name){
   df[df==""] <- NA
   # Clean the names according the them rules
   names(df) <- clean_names(names(df))
-  return(df)
+  # Trimws
+  df <- mutate(df, across(everything(), ~trimws(.x)))
+  # return a distinct dataframe
+  if (any(duplicated(df[[1]]))) warning("duplicates detected in first column (id col?)")
+  return(distinct(df))
 }
 
 #' Quickly get all unique values in a vector and print them out in a string 
