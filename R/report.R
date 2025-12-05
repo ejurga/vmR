@@ -9,6 +9,12 @@ clean_names <- function(x){
   return(new_names)
 }
 
+#' Return an excel time format as a character vector
+excel_time_to_char <- function(x){
+  dt <- openxlsx::convertToDateTime(x)
+  time <- as.character(hms::as_hms(dt))
+  return(time)
+}
 #' Read fields from a GRDI excel template, combining sheets if necessary
 #'
 #' @param file excel file to read
@@ -21,6 +27,8 @@ read_template_from_excel <- function(file, fields = c("Samples", "Isolates", "Se
     dfs = list()
     cols_remove = c("alternative_sample_id", "isolate_id", "alternative_isolate_id")
     dfs$sam  <- open_sheet(file = file, sheet_name = "Sample Collection & Processing")
+    dfs$sam$sample_collection_start_time <- excel_time_to_char(dfs$sam$sample_collection_start_time)
+    dfs$sam$sample_collection_end_time   <- excel_time_to_char(dfs$sam$sample_collection_end_time)
     dfs$host <- open_sheet(file, sheet_name = "Host Information")         %>% select(-any_of(cols_remove)) %>% distinct()
     dfs$env  <- open_sheet(file, sheet_name = "Environmental conditions") %>% select(-any_of(cols_remove)) %>% distinct()
     tryCatch({
@@ -46,7 +54,8 @@ read_template_from_excel <- function(file, fields = c("Samples", "Isolates", "Se
                nucleic_acid_extraction_method,
                nucleic_acid_extraction_kit,
                nucleic_acid_storage_duration_value,
-               nucleic_acid_storage_duration_unit)
+               nucleic_acid_storage_duration_unit) %>%
+        distinct()
       seq <- df %>% left_join(sam, by = 'sample_collector_sample_id', relationship = "many-to-one")
       return(seq)
     }
