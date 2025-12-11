@@ -29,13 +29,15 @@ read_template_from_excel <- function(file, fields = c("Samples", "Isolates", "Se
     dfs$sam  <- open_sheet(file = file, sheet_name = "Sample Collection & Processing")
     dfs$sam$sample_collection_start_time <- excel_time_to_char(dfs$sam$sample_collection_start_time)
     dfs$sam$sample_collection_end_time   <- excel_time_to_char(dfs$sam$sample_collection_end_time)
-    dfs$host <- open_sheet(file, sheet_name = "Host Information")         %>% select(-any_of(cols_remove)) %>% distinct()
-    dfs$env  <- open_sheet(file, sheet_name = "Environmental conditions") %>% select(-any_of(cols_remove)) %>% distinct()
+    dfs$host <- open_sheet(file, sheet_name = "Host Information")
+    dfs$env  <- open_sheet(file, sheet_name = "Environmental conditions")
     tryCatch({
+      host <- dfs$host %>% select(-any_of(cols_remove)) %>% distinct()
+      env  <- dfs$env  %>% select(-any_of(cols_remove)) %>% distinct()
       df <- 
         dfs$sam %>%
-        left_join(dfs$sam, dfs$host, by = "sample_collector_sample_id", relationship = "one-to-many") %>%
-        left_join(dfs$env, by = "sample_collector_sample_id", relationship = "one-to-many")
+        left_join(host, by = "sample_collector_sample_id", relationship = "one-to-one") %>%
+        left_join(env,  by = "sample_collector_sample_id", relationship = "one-to-one")
       return(df)}, 
     error = function(cond){
       message("Error encountered, returning dfs seperately")
