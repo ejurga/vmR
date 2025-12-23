@@ -82,7 +82,7 @@ add_braces_to_ontology_terms <- function(x){
 #'
 #' @export
 extract_ont_id <- function(x){
-  sub(x = x, "^.{0,}\\[([A-Za-z_]+)[:_]([A-Z0-9]+)\\]", "\\1:\\2")
+  sub(x = x, "^.{0,}\\[([A-Za-z_]+)[:_]([A-Z0-9a-z]+)\\]", "\\1:\\2")
 }
 
 #' Match lookup terms
