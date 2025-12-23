@@ -99,3 +99,14 @@ insert_wgs_seq<- function(db, df){
   res <- dbExecute(db, insert_wgs_sql, list(df$isolate_id, df$extraction_id))
   message("Inserted ", res, " records into WGS table")
 }
+
+#' Insert a MTG record, tying extraction to sample
+#' 
+#' @export
+insert_mtg_seq<- function(db, df){
+  df$extraction_id <- new_extraction(vmr, df)
+  df$sequencing_id <- new_sequence(vmr, df)
+  insert_mtg_sql <- SQL("INSERT INTO metagenomic_extractions (sample_id, extraction_id) VALUES ($1, $2)")
+  res <- dbExecute(db, insert_mtg_sql, list(df$sample_id, df$extraction_id))
+  message("Inserted ", res, " records into MTG table")
+}
