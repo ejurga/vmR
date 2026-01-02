@@ -38,6 +38,7 @@ new_amr_test <- function(db, df){
                               "INSERT into am_susceptibility_tests (isolate_id, amr_testing_by, testing_date, contact_information)
                                VALUES ($1, $2, $3, $4) RETURNING id", 
                               list(df$isolate_id, df$amr_testing_by, df$amr_testing_date, df$amr_test_contact_id))$id
+  message("Inserted ", length(amr_test_id), " records into am tests table")
   return(amr_test_id)
 }
 
