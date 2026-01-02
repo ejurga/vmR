@@ -1,3 +1,26 @@
+#' Import sensititre data, add relevant testing information, and insert to database
+#' 
+#' This function attempts to be a complete wrapper for the insertion of MIC
+#' data from a sensititre raw data file into the VMR. 
+#' 
+#' This function, as is, makes several assumptions about the breakpoints 
+#' and testing information. Breakpoints are currently an internal function 
+#' with breakpoints received from the lab of Audrey Charlebois. It will not 
+#' be suitable for data from other labs that may use different breakpoints. 
+#' 
+#' Testing contact information and the date testing can be supplied manually 
+#' 
+#' @param db database connection to the vmr
+#' @param file path to the raw file 
+#' @param sheet if the path is to an excel file, provide the sheet 
+#' @param testing_date provide a date that the samples were tested, if no column is available in the datafile
+#' @param lab_name Name of the testing lab
+#' @param name name of the contact who did the testing
+#' @param email the email of the contact
+#' @param agency the agency that did the testing.
+#' 
+#' @returns nothing, but inserts into the database without commiting it.
+#' @export
 import_and_insert_sensititre <- function(db, file, sheet = NA, testing_date = NA, 
                                          lab_name = 'NML St-Hyacinthe', 
                                              name = 'Audrey Charlebois',
