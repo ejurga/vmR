@@ -86,9 +86,11 @@ open_sheet <- function(file, sheet_name){
   names(df) <- clean_names(names(df))
   # Trimws
   df <- mutate(df, across(everything(), ~trimws(.x)))
+  # Remove duplicates across entire column
+  df <- distinct(df)
   # return a distinct dataframe
   if (any(duplicated(df[[1]]))) warning("duplicates detected in first column (id col?)")
-  return(distinct(df))
+  return(df)
 }
 
 #' Quickly get all unique values in a vector and print them out in a string 
