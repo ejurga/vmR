@@ -55,10 +55,10 @@ insert_into_multi_choice_table <- function(db, ids, vals, table, is_ontology = F
     if (nrow(df_long)==0){ 
       message("No values for table ", table)
     } else { 
-      if (is_ontology==TRUE){
+      if (is_ontology){
         message("Inserting into ", table)
         df_long$ont_ids <- convert_GRDI_ont_to_vmr_ids(db, df_long$terms)
-      }
+      } else { df_long$ont_ids <- df_long$terms }
       insert_sql <- glue::glue_sql("INSERT INTO", table, "(sample_id, term_id) VALUES ($1, $2)", .sep = " ")
       res <- dbExecute(db, insert_sql, list(df_long$id, df_long$ont_ids))
       message("Inserted ", res, " record into multi-choice table ", table)

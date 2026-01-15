@@ -153,7 +153,7 @@ insert_sample_metadata <- function(db, df){
       "environmental_data_sampling_weather_conditions", "environmental_data_presampling_weather_conditions", "risk_activity")
   
   is_ont <- rep(TRUE,length(db_tables))
-  is_ont[is_ont=="environmental_data_material_constituents"] <- FALSE
+  is_ont[db_tables=="environmental_data_material_constituents"] <- FALSE
   
   for ( i in seq(length(multi_choice_tables)) ){
     insert_into_multi_choice_table(db,
