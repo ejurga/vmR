@@ -82,7 +82,8 @@ open_sensititre <- function(file, sheet=NA){
     } else {
       df <- openxlsx::read.xlsx(xlsxFile = file, 
                                 sheet = sheet, 
-                                na.strings = " ") 
+                                na.strings = " ", 
+                                detectDates = TRUE) 
       df <- suppressMessages(dplyr::as_tibble(df, .name_repair = "unique"))
     } 
   } else if (grepl(x=bname, ".csv")){
